@@ -1,0 +1,30 @@
+@import url("colors.css");
+
+table {
+  border: 1px solid var(--grey-200);
+  border-radius: 1rem;
+  border-spacing: 0;
+  margin: auto;
+  overflow: hidden;
+}
+
+thead {
+  background: linear-gradient(45deg, var(--cyan-500) 0%, var(--blue-500) 100%);
+}
+
+th {
+  padding-top: 2rem;
+}
+td {
+  border-top: 1px solid var(--grey-400);
+}
+
+td,
+th {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+tbody > tr:hover {
+  background-color: var(--slate-200);
+}
