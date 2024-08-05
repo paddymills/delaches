@@ -9,7 +9,7 @@
       "command": "watchexec",
       "args": [
         "--watch",
-        "src,templates",
+        "src",
         "--exts",
         "rs,toml,jinja",
         "--restart",

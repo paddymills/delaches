@@ -1,0 +1,22 @@
+{% extends "base" %}
+{% block title %}{{ super() }} | {{ title }} {% endblock %}
+{% block body %}
+<table>
+    <thead>
+        <tr>
+            <th>Member ID</th>
+            <th>Name</th>
+            <th>Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in members %}
+        <tr>
+            <td>{{ member.member_id }}</td>
+            <td>{{ member.firstname }} {{ member.lastname }}</td>
+            <td>{{ member.addr1 if member.addr1 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
