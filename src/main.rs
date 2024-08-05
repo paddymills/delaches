@@ -1,6 +1,7 @@
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::{response::Html, routing::get, Router};
+use delaches::member::Member;
 use minijinja::{context, Environment};
 use std::sync::Arc;
 
@@ -16,9 +17,11 @@ impl AppState {
         let mut env = Environment::new();
 
         // load templates
-        env.add_template("base", include_str!("../templates/base.jinja"))
+        env.add_template("base", include_str!("templates/base.jinja"))
             .unwrap();
-        env.add_template("home", include_str!("../templates/home.jinja"))
+        env.add_template("home", include_str!("templates/home.jinja"))
+            .unwrap();
+        env.add_template("members", include_str!("templates/members.jinja"))
             .unwrap();
 
         Self { env }
@@ -63,6 +66,7 @@ async fn main() -> Result<(), std::io::Error> {
     // build our application with a single route
     let app = Router::new()
         .route("/", get(home))
+        .route("/members", get(members))
         .nest_service("/assets", ServeDir::new("assets"))
         .with_state(state);
 
@@ -81,6 +85,19 @@ async fn home(State(state): State<Arc<AppState>>) -> Result<Html<String>, Status
         .render(context! {
             title => "Home",
             welcome_text => "Hello World!",
+        })
+        .unwrap();
+
+    Ok(Html(rendered))
+}
+
+async fn members(State(state): State<Arc<AppState>>) -> Result<Html<String>, StatusCode> {
+    let template = state.env.get_template("members").unwrap();
+
+    let rendered = template
+        .render(context! {
+            title => "Members",
+            members => Member::load_data(),
         })
         .unwrap();
 

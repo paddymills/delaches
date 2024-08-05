@@ -1,0 +1,14 @@
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+table {
+  border: 0.25rem dashed black;
+  border-radius: 1rem;
+}
+
+td {
+  border: 1px solid slategray;
+}
