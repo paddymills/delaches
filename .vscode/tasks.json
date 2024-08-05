@@ -6,8 +6,18 @@
     {
       "label": "server",
       "type": "shell",
-      "command": "cargo",
-      "args": ["watch", "--why", "--exec", "run"],
+      "command": "watchexec",
+      "args": [
+        "--watch",
+        "src,templates",
+        "--exts",
+        "rs,toml,jinja",
+        "--restart",
+        "--",
+        "cargo",
+        "run",
+        "-q"
+      ],
       "runOptions": {
         "runOn": "folderOpen"
       }
