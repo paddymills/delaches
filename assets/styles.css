@@ -1,14 +1,39 @@
+@import url("colors.css");
+
 body {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  font-family: sans-serif;
+  text-align: center;
+}
+
+main {
+  margin: auto;
+  padding: 1rem;
 }
 
 table {
   border: 0.25rem dashed black;
   border-radius: 1rem;
+  border-spacing: 0;
+  margin: auto;
 }
 
+thead {
+  background: linear-gradient(45deg, var(--cyan-500) 0%, var(--blue-500) 100%);
+}
+
+th {
+  padding-top: 2rem;
+}
 td {
-  border: 1px solid slategray;
+  border-top: 1px solid var(--grey-400);
+}
+
+td,
+th {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+tbody > tr:hover {
+  background-color: var(--slate-200);
 }
