@@ -1,5 +1,0 @@
-{% extends "base" %}
-{% block title %}{{ super() }} | {{ title }} {% endblock %}
-{% block body %}
-<div hx-get="/get-members" hx-trigger="load every 60s" style="text-align: center;">Loading members...</div>
-{% endblock %}

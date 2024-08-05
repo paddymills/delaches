@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+    <script defer src="/assets/alpine.min.js"></script>
+    <script defer src="/assets/htmx.min.js"></script>
+    <title>Delaches Member Management</title>
+  </head>
+
+  <body>
+    <noscript>This webpage requires javascript to run.</noscript>
+    <main>
+      <div
+        hx-get="/get-members"
+        hx-trigger="load every 60s"
+        style="text-align: center"
+      >
+        Loading members...
+      </div>
+    </main>
+  </body>
+</html>

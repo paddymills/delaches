@@ -5,36 +5,23 @@ use delaches::member::Member;
 use minijinja::{context, Environment};
 use std::sync::Arc;
 
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 
 struct AppState {
-    pages: Environment<'static>,
     fragments: Environment<'static>,
 }
 
 // TODO: custom error type and remove the unrwaps
 impl AppState {
     fn new() -> Self {
-        let mut pages = Environment::new();
         let mut fragments = Environment::new();
-
-        // load page templates
-        pages
-            .add_template("base", include_str!("templates/pages/base.jinja"))
-            .unwrap();
-        pages
-            .add_template("home", include_str!("templates/pages/home.jinja"))
-            .unwrap();
-        pages
-            .add_template("members", include_str!("templates/pages/members.jinja"))
-            .unwrap();
 
         // load fragment templates
         fragments
-            .add_template("members", include_str!("templates/fragments/members.jinja"))
+            .add_template("members", include_str!("templates/members.jinja"))
             .unwrap();
 
-        Self { pages, fragments }
+        Self { fragments }
     }
 }
 
@@ -75,9 +62,9 @@ async fn main() -> Result<(), std::io::Error> {
 
     // build our application with a single route
     let app = Router::new()
-        .route("/", get(home))
-        .route("/members", get(members))
-        .route("/get-members", get(members_data))
+        .route("/get-members", get(members))
+        .nest_service("/", ServeFile::new("public/index.html"))
+        .nest_service("/members", ServeFile::new("public/members.html"))
         .nest_service("/assets", ServeDir::new("assets"))
         .with_state(state);
 
@@ -89,32 +76,7 @@ async fn main() -> Result<(), std::io::Error> {
     Ok(())
 }
 
-async fn home(State(state): State<Arc<AppState>>) -> Result<Html<String>, StatusCode> {
-    let template = state.pages.get_template("home").unwrap();
-
-    let rendered = template
-        .render(context! {
-            title => "Home",
-            welcome_text => "Hello World!",
-        })
-        .unwrap();
-
-    Ok(Html(rendered))
-}
-
 async fn members(State(state): State<Arc<AppState>>) -> Result<Html<String>, StatusCode> {
-    let template = state.pages.get_template("members").unwrap();
-
-    let rendered = template
-        .render(context! {
-            title => "Members",
-        })
-        .unwrap();
-
-    Ok(Html(rendered))
-}
-
-async fn members_data(State(state): State<Arc<AppState>>) -> Result<Html<String>, StatusCode> {
     let template = state.fragments.get_template("members").unwrap();
 
     let rendered = template
