@@ -1,0 +1,15 @@
+[package]
+name = "delaches"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.7.5", features = ["http2", "ws"] }
+fern = "0.6.2"
+humantime = "2.1.0"
+log = "0.4.22"
+minijinja = "2.1.1"
+serde = { version = "1.0.204", features = ["derive"] }
+sqlite = "0.36.0"
+thiserror = "1.0.63"
+tokio = { version = "1.39.2", features = ["macros", "rt-multi-thread"] }
