@@ -8,10 +8,6 @@ table {
   overflow: hidden;
 }
 
-thead {
-  background: linear-gradient(45deg, var(--cyan-500) 0%, var(--blue-500) 100%);
-}
-
 th {
   padding-top: 2rem;
 }
