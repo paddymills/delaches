@@ -2,6 +2,7 @@ use axum::extract::State;
 use axum::http::StatusCode;
 use axum::{response::Html, routing::get, Router};
 use delaches::member::Member;
+use delaches::user::User;
 use minijinja::{context, Environment};
 use std::sync::Arc;
 
@@ -19,6 +20,9 @@ impl AppState {
         // load fragment templates
         fragments
             .add_template("members", include_str!("templates/members.jinja"))
+            .unwrap();
+        fragments
+            .add_template("landing", include_str!("templates/landing.jinja"))
             .unwrap();
 
         Self { fragments }
@@ -62,10 +66,12 @@ async fn main() -> Result<(), std::io::Error> {
 
     // build our application with a single route
     let app = Router::new()
-        .route("/get-members", get(members))
-        .nest_service("/", ServeFile::new("public/index.html"))
-        .nest_service("/members", ServeFile::new("public/members.html"))
+        .route_service("/", ServeFile::new("public/index.html"))
+        .route_service("/members", ServeFile::new("public/members.html"))
         .nest_service("/assets", ServeDir::new("assets"))
+        .nest_service("/style", ServeDir::new("style"))
+        .route("/get-members", get(members))
+        .route("/landing", get(landing)) // TODO: authentication
         .with_state(state);
 
     // run our app with hyper, listening globally on port 3000
@@ -74,6 +80,18 @@ async fn main() -> Result<(), std::io::Error> {
     axum::serve(listener, app).await.unwrap();
 
     Ok(())
+}
+
+async fn landing(State(state): State<Arc<AppState>>) -> Result<Html<String>, StatusCode> {
+    let template = state.fragments.get_template("landing").unwrap();
+
+    let rendered = template
+        .render(context! {
+            user => User::Admin
+        })
+        .unwrap();
+
+    Ok(Html(rendered))
 }
 
 async fn members(State(state): State<Arc<AppState>>) -> Result<Html<String>, StatusCode> {
@@ -85,7 +103,7 @@ async fn members(State(state): State<Arc<AppState>>) -> Result<Html<String>, Sta
         })
         .unwrap();
 
-    std::thread::sleep(std::time::Duration::from_secs(2));
+    std::thread::sleep(std::time::Duration::from_secs(1));
 
     Ok(Html(rendered))
 }
