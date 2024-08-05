@@ -72,6 +72,7 @@ async fn main() -> Result<(), std::io::Error> {
         .nest_service("/style", ServeDir::new("style"))
         .route("/get-members", get(members))
         .route("/landing", get(landing)) // TODO: authentication
+        .fallback(fallback)
         .with_state(state);
 
     // run our app with hyper, listening globally on port 3000
@@ -106,4 +107,11 @@ async fn members(State(state): State<Arc<AppState>>) -> Result<Html<String>, Sta
     std::thread::sleep(std::time::Duration::from_secs(1));
 
     Ok(Html(rendered))
+}
+
+async fn fallback() -> (StatusCode, Html<&'static str>) {
+    (
+        StatusCode::NOT_FOUND,
+        Html(include_str!("../public/404.html")),
+    )
 }

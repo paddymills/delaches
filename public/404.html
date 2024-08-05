@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+    <script defer src="/assets/alpine.min.js"></script>
+    <title>Delaches Member Management</title>
+    <style>
+      body {
+        background: black;
+        color: white;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      main {
+        text-align: center;
+      }
+
+      .glitch {
+        font-size: 5rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        position: relative;
+        text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff,
+          0.025em 0.04em 0 #fffc00;
+        animation: glitch 725ms infinite;
+      }
+
+      @keyframes glitch {
+        0% {
+          text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff,
+            0.025em 0.04em 0 #fffc00;
+        }
+        15% {
+          text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff,
+            0.025em 0.04em 0 #fffc00;
+        }
+        16% {
+          text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff,
+            -0.05em -0.05em 0 #fffc00;
+        }
+        49% {
+          text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff,
+            -0.05em -0.05em 0 #fffc00;
+        }
+        50% {
+          text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff,
+            0 -0.04em 0 #fffc00;
+        }
+        99% {
+          text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff,
+            0 -0.04em 0 #fffc00;
+        }
+        100% {
+          text-shadow: -0.05em 0 0 #00fffc, -0.025em -0.04em 0 #fc00ff,
+            -0.04em -0.025em 0 #fffc00;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>This webpage requires javascript to run.</noscript>
+    <main>
+      <p class="glitch">404</p>
+      <p>The page you are looking for cannot be found</p>
+    </main>
+  </body>
+</html>
