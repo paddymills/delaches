@@ -1,6 +1,3 @@
-{% extends "base" %}
-{% block title %}{{ super() }} | {{ title }} {% endblock %}
-{% block body %}
 <table>
     <thead>
         <tr>
@@ -18,5 +15,9 @@
         </tr>
         {% endfor %}
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="100">pagination and such</td>
+        </tr>
+    </tfoot>
 </table>
-{% endblock %}
