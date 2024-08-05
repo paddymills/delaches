@@ -15,7 +15,7 @@
         "--watch",
         "public",
         "--exts",
-        "rs,toml,jinja",
+        "rs,toml,html,css,jinja",
         "--restart",
         "--",
         "cargo",
