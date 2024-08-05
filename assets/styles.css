@@ -11,10 +11,11 @@ main {
 }
 
 table {
-  border: 0.25rem dashed black;
+  border: 1px solid var(--grey-200);
   border-radius: 1rem;
   border-spacing: 0;
   margin: auto;
+  overflow: hidden;
 }
 
 thead {
