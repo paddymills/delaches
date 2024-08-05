@@ -10,6 +10,10 @@
       "args": [
         "--watch",
         "src",
+        "--watch",
+        "assets",
+        "--watch",
+        "public",
         "--exts",
         "rs,toml,jinja",
         "--restart",
