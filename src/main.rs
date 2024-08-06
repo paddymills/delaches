@@ -12,6 +12,10 @@ pub struct Cli {
     #[arg(short, long, default_value_t = 3000)]
     port: u32,
 
+    /// create database
+    #[arg(long)]
+    init_db: bool,
+
     /// import csv file(s) into the database
     #[arg(short, long, num_args = 0..)]
     load: Option<Vec<PathBuf>>,
@@ -55,6 +59,11 @@ async fn main() -> Result<(), Error> {
     init_logging()?;
 
     let args = Cli::parse();
+
+    if args.init_db {
+        let db = rusqlite::Connection::open("db.sqlite")?;
+        db.execute_batch(include_str!("schema.sql"))?;
+    }
 
     if let Some(files) = args.load {
         if !delaches::server::AppServer::is_running(args.port).await {
