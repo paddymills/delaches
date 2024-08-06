@@ -5,12 +5,13 @@ use axum::http::StatusCode;
 use axum::{response::Html, routing::get, Router};
 use minijinja::{context, Environment};
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 use tower_http::services::{ServeDir, ServeFile};
 
 pub struct AppState {
     pub fragments: Environment<'static>,
-    pub db: sqlite::ConnectionThreadSafe,
+    pub db: Arc<Mutex<rusqlite::Connection>>,
 }
 
 impl AppState {
@@ -23,7 +24,7 @@ impl AppState {
         fragments.add_template("landing", include_str!("templates/landing.jinja"))?;
 
         // init database
-        let db = sqlite::Connection::open_thread_safe("db.sqlite")?;
+        let db = Arc::new(Mutex::new(rusqlite::Connection::open("db.sqlite")?));
 
         Ok(Self { fragments, db })
     }

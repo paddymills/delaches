@@ -4,6 +4,7 @@ use axum::{
     response::Html,
 };
 use minijinja::context;
+use rusqlite::named_params;
 use std::sync::Arc;
 
 #[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
@@ -25,34 +26,18 @@ pub struct Member {
 }
 
 impl Member {
-    pub fn sqlite_binds<'m>(self) -> [(&'m str, sqlite::Value); 14] {
-        [
-            (":member_id", (self.member_id as i64).into()),
-            (":card_id", (self.card_id as i64).into()),
-            (":ecard", (self.ecard as i64).into()),
-            (":member_id_type", (self.member_id_type as i64).into()),
-            (":firstname", (self.firstname).into()),
-            (":lastname", (self.lastname).into()),
-            (":addr1", (self.addr1).into()),
-            (":addr2", (self.addr2).into()),
-            (":city", (self.city).into()),
-            (":state", (self.state).into()),
-            (":zip", (self.zip.map(|x| x as i64)).into()),
-            (":phone1", (self.phone1).into()),
-            (":phone2", (self.phone2).into()),
-            (":email", (self.email).into()),
-        ]
-    }
-
     pub async fn get_members(
         State(state): State<Arc<AppState>>,
     ) -> Result<Html<String>, crate::AppError> {
+        let state = state.clone();
+
         let members = state
             .db
+            .lock()
+            .await
             .prepare("SELECT * FROM Members")?
-            .iter()
-            .map(|row| row.map(|row| Member::from(row)))
-            .collect::<Result<Vec<Member>, sqlite::Error>>()?;
+            .query_map([], |row| Member::try_from(row))?
+            .collect::<Result<Vec<Member>, rusqlite::Error>>()?;
 
         let template = state.fragments.get_template("members")?;
         let rendered = template.render(context! {
@@ -70,17 +55,13 @@ impl Member {
     ) -> Result<Html<String>, crate::AppError> {
         log::trace!("Getting member with id: {id}");
 
-        let mut query = state
+        let state = state.clone();
+        let member = state
             .db
-            .prepare("SELECT * FROM Members WHERE MemberId = ?")?;
-        query.bind((1, id as i64))?;
-
-        let member = match query.iter().next() {
-            Some(Ok(row)) => Ok(Self::from(row)),
-            _ => Err(crate::AppError::NotFound(format!(
-                "Member not found in database with id: {id}"
-            ))),
-        }?;
+            .lock()
+            .await
+            .prepare("SELECT * FROM Members WHERE MemberId = :id")?
+            .query_row(named_params! { ":id": id }, |row| Member::try_from(row))?;
 
         Ok(Html(state.fragments.get_template("member")?.render(
             context! {
@@ -95,6 +76,48 @@ impl Member {
     ) -> Result<(), crate::AppError> {
         log::trace!("Adding member: {member:?}");
 
+        let state = state.clone();
+        state
+            .db
+            .lock()
+            .await
+            .prepare(
+                r#"
+INSERT INTO Members
+VALUES
+    :member_id,
+    :card_id,
+    :ecard,
+    :member_id_type,
+    :firstname,
+    :lastname,
+    :addr1,
+    :addr2,
+    :city,
+    :state,
+    :zip,
+    :phone1,
+    :phone2,
+    :email
+"#,
+            )?
+            .insert(named_params! {
+                    ":id": member.member_id,
+                    ":card_id": member.card_id,
+                    ":ecard": member.ecard,
+                    ":member_id_type": member.member_id_type,
+                    ":firstname": member.firstname,
+                    ":lastname": member.lastname,
+                    ":addr1": member.addr1,
+                    ":addr2": member.addr2,
+                    ":city": member.city,
+                    ":state": member.state,
+                    ":zip": member.zip,
+                    ":phone1": member.phone1,
+                    ":phone2": member.phone2,
+                    ":email": member.email,
+            })?;
+
         Ok(())
     }
 
@@ -105,8 +128,13 @@ impl Member {
     ) -> Result<(), crate::AppError> {
         log::trace!("Updating member {member:?}");
 
-        let mut query = state.db.prepare(
-            r#"
+        let state = state.clone();
+        let _ = state
+            .db
+            .lock()
+            .await
+            .prepare(
+                r#"
 UPDATE Members
 SET
     CardId=:card_id,
@@ -124,31 +152,47 @@ SET
     Email=:email
 WHERE MemberId = :id
 "#,
-        )?;
-        query.bind(&member.sqlite_binds()[..])?;
-        query.bind((":id", id as i64))?;
+            )?
+            .execute(named_params! {
+                    ":id": id,
+                    ":card_id": member.card_id,
+                    ":ecard": member.ecard,
+                    ":member_id_type": member.member_id_type,
+                    ":firstname": member.firstname,
+                    ":lastname": member.lastname,
+                    ":addr1": member.addr1,
+                    ":addr2": member.addr2,
+                    ":city": member.city,
+                    ":state": member.state,
+                    ":zip": member.zip,
+                    ":phone1": member.phone1,
+                    ":phone2": member.phone2,
+                    ":email": member.email,
+            })?;
 
         Ok(())
     }
 }
 
-impl From<sqlite::Row> for Member {
-    fn from(row: sqlite::Row) -> Self {
-        Member {
-            member_id: row.read::<i64, _>("MemberId") as u32,
-            card_id: row.read::<i64, _>("CardId") as u32,
-            ecard: row.read::<i64, _>("ECard") as u32,
-            member_id_type: row.read::<i64, _>("MemberTypeId") as u32,
-            firstname: row.read::<&str, _>("FirstName").into(),
-            lastname: row.read::<&str, _>("LastName").into(),
-            addr1: row.read::<Option<&str>, _>("Address1").map(Into::into),
-            addr2: row.read::<Option<&str>, _>("Address2").map(Into::into),
-            city: row.read::<Option<&str>, _>("City").map(Into::into),
-            state: row.read::<Option<&str>, _>("State").map(Into::into),
-            zip: row.read::<Option<i64>, _>("Zip").map(|x| x as u32),
-            phone1: row.read::<Option<&str>, _>("Phone1").map(Into::into),
-            phone2: row.read::<Option<&str>, _>("Phone2").map(Into::into),
-            email: row.read::<Option<&str>, _>("Email").map(Into::into),
-        }
+impl TryFrom<&rusqlite::Row<'_>> for Member {
+    type Error = rusqlite::Error;
+
+    fn try_from(row: &rusqlite::Row) -> Result<Self, Self::Error> {
+        Ok(Member {
+            member_id: row.get::<_, u32>("MemberId")?,
+            card_id: row.get::<_, u32>("CardId")?,
+            ecard: row.get::<_, u32>("ECard")?,
+            member_id_type: row.get::<_, u32>("MemberTypeId")?,
+            firstname: row.get::<_, String>("FirstName")?,
+            lastname: row.get::<_, String>("LastName")?,
+            addr1: row.get::<_, String>("Address1").ok(),
+            addr2: row.get::<_, String>("Address2").ok(),
+            city: row.get::<_, String>("City").ok(),
+            state: row.get::<_, String>("State").ok(),
+            zip: row.get::<_, u32>("Zip").ok(),
+            phone1: row.get::<_, String>("Phone1").ok(),
+            phone2: row.get::<_, String>("Phone2").ok(),
+            email: row.get::<_, String>("Email").ok(),
+        })
     }
 }
