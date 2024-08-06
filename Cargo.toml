@@ -1,10 +1,12 @@
 [package]
 name = "delaches"
+description = "Delaches member management application"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 axum = { version = "0.7.5", features = ["http2", "ws"] }
+clap = { version = "4.5.13", features = ["derive"] }
 fern = "0.6.2"
 humantime = "2.1.0"
 log = "0.4.22"
