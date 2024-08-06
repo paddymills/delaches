@@ -43,6 +43,7 @@ impl AppServer {
             .nest_service("/style", ServeDir::new("style"))
             .route("/get-members", get(members))
             .route("/landing", get(landing)) // TODO: authentication
+            .route("/alive", get(|| async { StatusCode::OK }))
             .fallback(fallback)
             .with_state(state);
 
@@ -52,6 +53,10 @@ impl AppServer {
         axum::serve(listener, app).await?;
 
         Ok(())
+    }
+
+    pub async fn is_running(port: u32) -> bool {
+        reqwest::get(format!("0.0.0.0:{}", port)).await.is_ok()
     }
 }
 
