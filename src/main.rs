@@ -1,7 +1,21 @@
-use delaches::server::AppServer;
+use clap::Parser;
 
-#[tokio::main]
-async fn main() -> Result<(), std::io::Error> {
+type Error = delaches::AppError;
+
+#[derive(Debug, clap::Parser)]
+#[command(version, about)]
+/// Delaches member management system server
+pub struct Cli {
+    /// port to run server on
+    #[arg(short, long, default_value_t = 3000)]
+    port: u32,
+
+    /// import csv file(s) into the database
+    #[arg(short, long)]
+    load: Option<Vec<String>>,
+}
+
+fn init_logging() -> Result<(), Error> {
     // build logging for our application
     fern::Dispatch::new()
         .format(|out, message, record| {
@@ -29,8 +43,24 @@ async fn main() -> Result<(), std::io::Error> {
                     .open("server.log")?,
             ),
         )
-        .apply()
-        .expect("failed to init logging");
+        .apply()?;
 
-    AppServer::new().run().await
+    Ok(())
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    init_logging()?;
+
+    let args = Cli::parse();
+
+    if let Some(files) = args.load {
+        for file in files {
+            log::info!("Loading file {file} into database");
+        }
+    } else {
+        delaches::server::AppServer::serve(args.port).await?;
+    }
+
+    Ok(())
 }

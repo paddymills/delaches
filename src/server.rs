@@ -3,7 +3,6 @@ use crate::user::User;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::{response::Html, routing::get, Router};
-use clap::Parser;
 use minijinja::{context, Environment};
 use std::sync::Arc;
 
@@ -30,29 +29,11 @@ impl AppState {
     }
 }
 
-#[derive(Debug, clap::Parser)]
-#[command(version, about)]
-/// Delaches member management system server
-pub struct AppServer {
-    /// port to run server on
-    #[arg(short, long, default_value_t = 3000)]
-    port: u32,
-
-    /// import a file into the database
-    #[arg(short, long)]
-    load: Option<String>,
-}
+#[derive(Debug)]
+pub struct AppServer {}
 
 impl AppServer {
-    pub fn new() -> Self {
-        Self::parse()
-    }
-
-    pub async fn run(self) -> Result<(), std::io::Error> {
-        self.serve().await
-    }
-
-    async fn serve(self) -> Result<(), std::io::Error> {
+    pub async fn serve(port: u32) -> Result<(), crate::AppError> {
         // init state
         let state = Arc::new(AppState::new());
 
@@ -68,9 +49,11 @@ impl AppServer {
             .with_state(state);
 
         // run our app with hyper, listening globally on port 3000
-        let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", self.port)).await?;
-        log::info!("Delaches member management app is running at http://localhost:3000");
-        axum::serve(listener, app).await
+        let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
+        log::info!("server is running at http://localhost:{}", port);
+        axum::serve(listener, app).await?;
+
+        Ok(())
     }
 }
 
