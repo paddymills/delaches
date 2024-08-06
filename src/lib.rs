@@ -8,6 +8,8 @@ pub enum AppError {
     IoError(#[from] std::io::Error),
     #[error(transparent)]
     LoggingError(#[from] log::SetLoggerError),
+    #[error(transparent)]
+    TemplateError(#[from] minijinja::Error),
     #[error("Requested resource not found")]
     NotFound(String),
 }

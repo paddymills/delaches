@@ -14,18 +14,14 @@ struct AppState {
 
 // TODO: custom error type and remove the unrwaps
 impl AppState {
-    fn new() -> Self {
+    fn new() -> Result<Self, crate::AppError> {
         let mut fragments = Environment::new();
 
         // load fragment templates
-        fragments
-            .add_template("members", include_str!("templates/members.jinja"))
-            .unwrap();
-        fragments
-            .add_template("landing", include_str!("templates/landing.jinja"))
-            .unwrap();
+        fragments.add_template("members", include_str!("templates/members.jinja"))?;
+        fragments.add_template("landing", include_str!("templates/landing.jinja"))?;
 
-        Self { fragments }
+        Ok(Self { fragments })
     }
 }
 
@@ -35,7 +31,7 @@ pub struct AppServer {}
 impl AppServer {
     pub async fn serve(port: u32) -> Result<(), crate::AppError> {
         // init state
-        let state = Arc::new(AppState::new());
+        let state = Arc::new(AppState::new()?);
 
         // build our application with a single route
         let app = Router::new()
