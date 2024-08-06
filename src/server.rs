@@ -1,4 +1,3 @@
-use crate::member::Member;
 use crate::user::User;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -10,9 +9,9 @@ use tower_http::services::{ServeDir, ServeFile};
 
 struct AppState {
     fragments: Environment<'static>,
+    db: crate::db::Db,
 }
 
-// TODO: custom error type and remove the unrwaps
 impl AppState {
     fn new() -> Result<Self, crate::AppError> {
         let mut fragments = Environment::new();
@@ -21,7 +20,10 @@ impl AppState {
         fragments.add_template("members", include_str!("templates/members.jinja"))?;
         fragments.add_template("landing", include_str!("templates/landing.jinja"))?;
 
-        Ok(Self { fragments })
+        // init database
+        let db = crate::db::Db::new()?;
+
+        Ok(Self { fragments, db })
     }
 }
 
@@ -65,14 +67,12 @@ async fn landing(State(state): State<Arc<AppState>>) -> Result<Html<String>, Sta
     Ok(Html(rendered))
 }
 
-async fn members(State(state): State<Arc<AppState>>) -> Result<Html<String>, StatusCode> {
+async fn members(State(state): State<Arc<AppState>>) -> Result<Html<String>, crate::AppError> {
     let template = state.fragments.get_template("members").unwrap();
 
-    let rendered = template
-        .render(context! {
-            members => Member::load_data(),
-        })
-        .unwrap();
+    let rendered = template.render(context! {
+        members => state.db.get_members()?,
+    })?;
 
     std::thread::sleep(std::time::Duration::from_secs(1));
 
