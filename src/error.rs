@@ -15,6 +15,8 @@ pub enum AppError {
     CsvError(#[from] csv::Error),
     #[error("Requested resource not found")]
     NotFound(String),
+    #[error("Error parsing csv file")]
+    CsvParsingError(String),
 }
 
 // Tell axum how to convert `AppError` into a response.

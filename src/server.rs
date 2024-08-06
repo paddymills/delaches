@@ -1,3 +1,4 @@
+use crate::member::Member;
 use crate::user::User;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -7,9 +8,9 @@ use std::sync::Arc;
 
 use tower_http::services::{ServeDir, ServeFile};
 
-struct AppState {
-    fragments: Environment<'static>,
-    db: crate::db::Db,
+pub struct AppState {
+    pub fragments: Environment<'static>,
+    pub db: sqlite::ConnectionThreadSafe,
 }
 
 impl AppState {
@@ -18,10 +19,11 @@ impl AppState {
 
         // load fragment templates
         fragments.add_template("members", include_str!("templates/members.jinja"))?;
+        fragments.add_template("member", include_str!("templates/member.jinja"))?;
         fragments.add_template("landing", include_str!("templates/landing.jinja"))?;
 
         // init database
-        let db = crate::db::Db::new()?;
+        let db = sqlite::Connection::open_thread_safe("db.sqlite")?;
 
         Ok(Self { fragments, db })
     }
@@ -35,14 +37,22 @@ impl AppServer {
         // init state
         let state = Arc::new(AppState::new()?);
 
+        // TODO: authentication
         // build our application with a single route
         let app = Router::new()
             .route_service("/", ServeFile::new("public/index.html"))
             .route_service("/members", ServeFile::new("public/members.html"))
             .nest_service("/assets", ServeDir::new("assets"))
             .nest_service("/style", ServeDir::new("style"))
-            .route("/get-members", get(members))
-            .route("/landing", get(landing)) // TODO: authentication
+            .route("/landing", get(landing))
+            .route(
+                "/members/list",
+                get(Member::get_members).post(Member::add_member),
+            )
+            .route(
+                "/members/:id",
+                get(Member::get_member).post(Member::update_member),
+            )
             .route("/alive", get(|| async { StatusCode::OK }))
             .fallback(fallback)
             .with_state(state);
@@ -72,18 +82,6 @@ async fn landing(State(state): State<Arc<AppState>>) -> Result<Html<String>, Sta
             user => User::Admin
         })
         .unwrap();
-
-    Ok(Html(rendered))
-}
-
-async fn members(State(state): State<Arc<AppState>>) -> Result<Html<String>, crate::AppError> {
-    let template = state.fragments.get_template("members").unwrap();
-
-    let rendered = template.render(context! {
-        members => state.db.get_members()?,
-    })?;
-
-    std::thread::sleep(std::time::Duration::from_secs(1));
 
     Ok(Html(rendered))
 }

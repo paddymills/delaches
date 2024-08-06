@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use clap::Parser;
 
 type Error = delaches::AppError;
@@ -11,8 +13,8 @@ pub struct Cli {
     port: u32,
 
     /// import csv file(s) into the database
-    #[arg(short, long)]
-    load: Option<Vec<String>>,
+    #[arg(short, long, num_args = 0..)]
+    load: Option<Vec<PathBuf>>,
 }
 
 fn init_logging() -> Result<(), Error> {
@@ -55,9 +57,13 @@ async fn main() -> Result<(), Error> {
     let args = Cli::parse();
 
     if let Some(files) = args.load {
-        for file in files {
-            log::info!("Loading file {file} into database");
+        if !delaches::server::AppServer::is_running(args.port).await {
+            return Err(Error::CsvParsingError(String::from(
+                "Server needs to be running for files to be loaded",
+            )));
         }
+
+        delaches::csv::load_csv_files(files)?;
     } else {
         delaches::server::AppServer::serve(args.port).await?;
     }
