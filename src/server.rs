@@ -56,7 +56,11 @@ impl AppServer {
     }
 
     pub async fn is_running(port: u32) -> bool {
-        reqwest::get(format!("0.0.0.0:{}", port)).await.is_ok()
+        log::info!("Checking if server is alive at localhost:{}/alive", port);
+        match reqwest::get(format!("http://localhost:{}/alive", port)).await {
+            Ok(response) => response.status() == StatusCode::OK,
+            _ => false,
+        }
     }
 }
 
