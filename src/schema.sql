@@ -1,8 +1,8 @@
-CREATE TABLE Members (
-    MemberId INTEGER,
-    CardId INTEGER,
-    ECard INTEGER,
-    MemberTypeId INTEGER,
+CREATE TABLE IF NOT EXISTS Members (
+    MemberId INT PRIMARY KEY ON CONFLICT FAIL,
+    CardId INT,
+    ECard INT,
+    MemberTypeId INT,
     FirstName TEXT,
     LastName TEXT,
     Address1 TEXT,
@@ -13,25 +13,23 @@ CREATE TABLE Members (
     Phone1 TEXT,
     Phone2 TEXT,
     Email TEXT,
-    StatusID INTEGER,
+    StatusID INT,
     Birthday TEXT,
     MemberDate TEXT,
     FullAddress TEXT,
-    WorkFlag BOOLEAN,
+    WorkFlag BOOLEAN
 );
-
-CREATE TABLE TransactionTypes (
-    Id INT NOT NULL,
+CREATE TABLE IF NOT EXISTS TransactionTypes (
+    Id INT PRIMARY KEY ON CONFLICT FAIL,
     Description TEXT,
     RegularAmt FLOAT,
     JuniorAmt FLOAT,
     LifetimeAmount FLOAT
 );
-
-CREATE TABLE Transactions (
-    Id INT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS Transactions (
+    Id INT PRIMARY KEY ON CONFLICT FAIL,
     Timestamp DATETIME,
-    TransType INT FOREIGN KEY REFERENCES TransactionTypes(Id),
-    MemberId INT FOREIGN KEY REFERENCES Members(MemberId),
+    TransType INT REFERENCES TransactionTypes(Id),
+    MemberId INT REFERENCES Members(MemberId),
     Amount FLOAT
 );
