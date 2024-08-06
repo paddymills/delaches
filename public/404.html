@@ -4,9 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
-    <script defer src="/assets/alpine.min.js"></script>
     <title>Delaches Member Management</title>
     <style>
+      :root {
+        --yellow-300: #fde047;
+        --fuchsia-600: #c026d3;
+        --sky-400: #38bdf8;
+      }
+
       body {
         background: black;
         color: white;
@@ -26,48 +31,54 @@
         font-weight: bold;
         text-transform: uppercase;
         position: relative;
-        text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff,
-          0.025em 0.04em 0 #fffc00;
+        text-shadow: 0.05em 0 0 var(--sky-400),
+          -0.03em -0.04em 0 var(--fuchsia-600),
+          0.025em 0.04em 0 var(--yellow-300);
         animation: glitch 725ms infinite;
       }
 
       @keyframes glitch {
         0% {
-          text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff,
-            0.025em 0.04em 0 #fffc00;
+          text-shadow: 0.05em 0 0 var(--sky-400),
+            -0.03em -0.04em 0 var(--fuchsia-600),
+            0.025em 0.04em 0 var(--yellow-300);
         }
         15% {
-          text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff,
-            0.025em 0.04em 0 #fffc00;
+          text-shadow: 0.05em 0 0 var(--sky-400),
+            -0.03em -0.04em 0 var(--fuchsia-600),
+            0.025em 0.04em 0 var(--yellow-300);
         }
         16% {
-          text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff,
-            -0.05em -0.05em 0 #fffc00;
+          text-shadow: -0.05em -0.025em 0 var(--sky-400),
+            0.025em 0.035em 0 var(--fuchsia-600),
+            -0.05em -0.05em 0 var(--yellow-300);
         }
         49% {
-          text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff,
-            -0.05em -0.05em 0 #fffc00;
+          text-shadow: -0.05em -0.025em 0 var(--sky-400),
+            0.025em 0.035em 0 var(--fuchsia-600),
+            -0.05em -0.05em 0 var(--yellow-300);
         }
         50% {
-          text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff,
-            0 -0.04em 0 #fffc00;
+          text-shadow: 0.05em 0.035em 0 var(--sky-400),
+            0.03em 0 0 var(--fuchsia-600), 0 -0.04em 0 var(--yellow-300);
         }
         99% {
-          text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff,
-            0 -0.04em 0 #fffc00;
+          text-shadow: 0.05em 0.035em 0 var(--sky-400),
+            0.03em 0 0 var(--fuchsia-600), 0 -0.04em 0 var(--yellow-300);
         }
         100% {
-          text-shadow: -0.05em 0 0 #00fffc, -0.025em -0.04em 0 #fc00ff,
-            -0.04em -0.025em 0 #fffc00;
+          text-shadow: -0.05em 0 0 var(--sky-400),
+            -0.025em -0.04em 0 var(--fuchsia-600),
+            -0.04em -0.025em 0 var(--yellow-300);
         }
       }
     </style>
   </head>
   <body>
-    <noscript>This webpage requires javascript to run.</noscript>
     <main>
       <p class="glitch">404</p>
       <p>The page you are looking for cannot be found</p>
+      <a href="javascript:history.back()">back</a>
     </main>
   </body>
 </html>
