@@ -60,9 +60,11 @@ async fn main() -> Result<(), Error> {
 
     let args = Cli::parse();
 
+    let mut run_server = true;
     if args.init_db {
         let db = rusqlite::Connection::open("db.sqlite")?;
         db.execute_batch(include_str!("schema.sql"))?;
+        run_server = false;
     }
 
     if let Some(files) = args.load {
@@ -73,7 +75,10 @@ async fn main() -> Result<(), Error> {
         }
 
         delaches::csv::load_csv_files(files)?;
-    } else {
+        run_server = false;
+    }
+
+    if run_server {
         delaches::server::AppServer::serve(args.port).await?;
     }
 
