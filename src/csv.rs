@@ -40,18 +40,22 @@ async fn load_transactions(mut rdr: csv::Reader<File>) -> Result<(), crate::AppE
 
     let client = reqwest::Client::new();
     for result in rdr.into_deserialize::<Transaction>() {
-        let record = result?;
-        log::debug!("{:?}", record);
+        match result {
+            Ok(record) => {
+                log::debug!("{:?}", record);
 
-        let res = client
-            .post("http://localhost:3000/transactions/list")
-            .query(&record)
-            .send()
-            .await?;
+                let res = client
+                    .post("http://localhost:3000/transactions/list")
+                    .query(&record)
+                    .send()
+                    .await?;
 
-        match res.status() {
-            reqwest::StatusCode::INTERNAL_SERVER_ERROR => log::debug!("{:?}", res),
-            _ => log::trace!("{:?}", res),
+                match res.status() {
+                    reqwest::StatusCode::INTERNAL_SERVER_ERROR => log::debug!("{:?}", res),
+                    _ => log::trace!("{:?}", res),
+                }
+            }
+            Err(e) => log::error!("error deserializing Transaction from csv: {:?}", e),
         }
     }
 
@@ -77,18 +81,22 @@ async fn load_members(mut rdr: csv::Reader<File>) -> Result<(), crate::AppError>
 
     let client = reqwest::Client::new();
     for result in rdr.into_deserialize::<Member>() {
-        let record = result?;
-        log::debug!("{:?}", record);
+        match result {
+            Ok(record) => {
+                log::debug!("{:?}", record);
 
-        let res = client
-            .post("http://localhost:3000/members/list")
-            .query(&record)
-            .send()
-            .await?;
+                let res = client
+                    .post("http://localhost:3000/members/list")
+                    .query(&record)
+                    .send()
+                    .await?;
 
-        match res.status() {
-            reqwest::StatusCode::INTERNAL_SERVER_ERROR => log::debug!("{:?}", res),
-            _ => log::trace!("{:?}", res),
+                match res.status() {
+                    reqwest::StatusCode::INTERNAL_SERVER_ERROR => log::debug!("{:?}", res),
+                    _ => log::trace!("{:?}", res),
+                }
+            }
+            Err(e) => log::error!("error deserializing Member from csv: {:?}", e),
         }
     }
 
@@ -114,18 +122,22 @@ async fn load_trans_types(mut rdr: csv::Reader<File>) -> Result<(), crate::AppEr
 
     let client = reqwest::Client::new();
     for result in rdr.into_deserialize::<TransactionType>() {
-        let record = result?;
-        log::debug!("{:?}", record);
+        match result {
+            Ok(record) => {
+                log::debug!("{:?}", record);
 
-        let res = client
-            .post("http://localhost:3000/transactions/types/list")
-            .query(&record)
-            .send()
-            .await?;
+                let res = client
+                    .post("http://localhost:3000/transactions/types/list")
+                    .query(&record)
+                    .send()
+                    .await?;
 
-        match res.status() {
-            reqwest::StatusCode::INTERNAL_SERVER_ERROR => log::debug!("{:?}", res),
-            _ => log::trace!("{:?}", res),
+                match res.status() {
+                    reqwest::StatusCode::INTERNAL_SERVER_ERROR => log::debug!("{:?}", res),
+                    _ => log::trace!("{:?}", res),
+                }
+            }
+            Err(e) => log::error!("error deserializing Transaction Type from csv: {:?}", e),
         }
     }
 
