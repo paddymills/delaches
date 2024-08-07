@@ -9,9 +9,9 @@
     <tbody>
         {% for member in members %}
         <tr>
-            <td>{{ member.member_id }}</td>
-            <td>{{ member.firstname }} {{ member.lastname }}</td>
-            <td>{{ member.addr1 if member.addr1 }}</td>
+            <td>{{ member.MemberId }}</td>
+            <td>{{ member.FirstName }} {{ member.LastName }}</td>
+            <td>{{ member.Address1 if member.Address1 }}</td>
         </tr>
         {% endfor %}
     </tbody>
