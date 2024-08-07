@@ -12,6 +12,10 @@ pub struct Cli {
     #[arg(short, long, default_value_t = 3000)]
     port: u32,
 
+    /// logging name
+    #[arg(long, default_value_t = String::from("server"))]
+    log_name: String,
+
     /// create database
     #[arg(long)]
     init_db: bool,
@@ -21,7 +25,7 @@ pub struct Cli {
     load: Option<Vec<PathBuf>>,
 }
 
-fn init_logging() -> Result<(), Error> {
+fn init_logging(name: &str) -> Result<(), Error> {
     // build logging for our application
     fern::Dispatch::new()
         .format(|out, message, record| {
@@ -46,7 +50,7 @@ fn init_logging() -> Result<(), Error> {
                     .create(true)
                     .truncate(true)
                     .write(true)
-                    .open("server.log")?,
+                    .open(format!("{name}.log"))?,
             ),
         )
         .apply()?;
@@ -56,9 +60,8 @@ fn init_logging() -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    init_logging()?;
-
     let args = Cli::parse();
+    init_logging(&args.log_name)?;
 
     let mut run_server = true;
     if args.init_db {
@@ -74,7 +77,7 @@ async fn main() -> Result<(), Error> {
             )));
         }
 
-        delaches::csv::load_csv_files(files)?;
+        delaches::csv::load_csv_files(files).await?;
         run_server = false;
     }
 

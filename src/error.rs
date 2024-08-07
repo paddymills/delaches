@@ -17,6 +17,8 @@ pub enum AppError {
     NotFound(String),
     #[error("Error parsing csv file")]
     CsvParsingError(String),
+    #[error(transparent)]
+    ReqwestError(#[from] reqwest::Error),
 }
 
 // Tell axum how to convert `AppError` into a response.

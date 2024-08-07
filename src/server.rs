@@ -1,4 +1,4 @@
-use crate::member::Member;
+use crate::api::Member;
 use crate::user::User;
 use axum::extract::State;
 use axum::http::StatusCode;

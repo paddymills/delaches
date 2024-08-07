@@ -8,13 +8,14 @@ use rusqlite::named_params;
 use std::sync::Arc;
 
 #[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct Member {
     pub member_id: u32,
     pub card_id: u32,
-    pub ecard: u32,
-    pub member_id_type: u32,
-    pub firstname: String,
-    pub lastname: String,
+    pub e_card: Option<u32>,
+    pub member_type_id: u32,
+    pub first_name: String,
+    pub last_name: String,
     pub addr1: Option<String>,
     pub addr2: Option<String>,
     pub city: Option<String>,
@@ -83,14 +84,29 @@ impl Member {
             .await
             .prepare(
                 r#"
-INSERT INTO Members
-VALUES
+INSERT INTO Members(
+    MemberId,
+    CardId,
+    ECard,
+    MemberTypeId,
+    FirstName,
+    LastName,
+    Address1,
+    Address2,
+    City,
+    State,
+    Zip,
+    Phone1,
+    Phone2,
+    Email
+)
+VALUES (
     :member_id,
     :card_id,
     :ecard,
-    :member_id_type,
-    :firstname,
-    :lastname,
+    :member_type_id,
+    :first_name,
+    :last_name,
     :addr1,
     :addr2,
     :city,
@@ -99,15 +115,15 @@ VALUES
     :phone1,
     :phone2,
     :email
-"#,
+)"#,
             )?
             .insert(named_params! {
-                    ":id": member.member_id,
+                    ":member_id": member.member_id,
                     ":card_id": member.card_id,
-                    ":ecard": member.ecard,
-                    ":member_id_type": member.member_id_type,
-                    ":firstname": member.firstname,
-                    ":lastname": member.lastname,
+                    ":ecard": member.e_card,
+                    ":member_type_id": member.member_type_id,
+                    ":first_name": member.first_name,
+                    ":last_name": member.last_name,
                     ":addr1": member.addr1,
                     ":addr2": member.addr2,
                     ":city": member.city,
@@ -139,9 +155,9 @@ UPDATE Members
 SET
     CardId=:card_id,
     ECard=:ecard,
-    MemberTypeId=:member_id_type,
-    FirstName=:firstname,
-    LastName=:lastname,
+    MemberTypeId=:member_type_id,
+    first_name=:first_name,
+    last_name=:last_name,
     Address1=:addr1,
     Address2=:addr2,
     City=:city,
@@ -156,10 +172,10 @@ WHERE MemberId = :id
             .execute(named_params! {
                     ":id": id,
                     ":card_id": member.card_id,
-                    ":ecard": member.ecard,
-                    ":member_id_type": member.member_id_type,
-                    ":firstname": member.firstname,
-                    ":lastname": member.lastname,
+                    ":ecard": member.e_card,
+                    ":member_type_id": member.member_type_id,
+                    ":first_name": member.first_name,
+                    ":last_name": member.last_name,
                     ":addr1": member.addr1,
                     ":addr2": member.addr2,
                     ":city": member.city,
@@ -181,10 +197,10 @@ impl TryFrom<&rusqlite::Row<'_>> for Member {
         Ok(Member {
             member_id: row.get::<_, u32>("MemberId")?,
             card_id: row.get::<_, u32>("CardId")?,
-            ecard: row.get::<_, u32>("ECard")?,
-            member_id_type: row.get::<_, u32>("MemberTypeId")?,
-            firstname: row.get::<_, String>("FirstName")?,
-            lastname: row.get::<_, String>("LastName")?,
+            e_card: row.get::<_, u32>("ECard").ok(),
+            member_type_id: row.get::<_, u32>("MemberTypeId")?,
+            first_name: row.get::<_, String>("first_name")?,
+            last_name: row.get::<_, String>("last_name")?,
             addr1: row.get::<_, String>("Address1").ok(),
             addr2: row.get::<_, String>("Address2").ok(),
             city: row.get::<_, String>("City").ok(),
