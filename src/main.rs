@@ -37,11 +37,10 @@ fn init_logging(name: &str) -> Result<(), Error> {
                 message
             ))
         })
-        // .level(log::LevelFilter::Error)
-        .level_for("delaches", log::LevelFilter::Trace)
         .chain(
             fern::Dispatch::new()
-                .level(log::LevelFilter::Debug)
+                .level(log::LevelFilter::Error)
+                .level_for("delaches", log::LevelFilter::Debug)
                 .chain(std::io::stdout()),
         )
         .chain(
@@ -50,7 +49,7 @@ fn init_logging(name: &str) -> Result<(), Error> {
                     .create(true)
                     .truncate(true)
                     .write(true)
-                    .open(format!("{name}.log"))?,
+                    .open(format!("logs/{name}.log"))?,
             ),
         )
         .apply()?;
