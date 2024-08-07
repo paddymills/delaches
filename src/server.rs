@@ -52,7 +52,7 @@ impl AppServer {
             )
             .route(
                 "/members/:id",
-                get(Member::get_member).post(Member::update_member),
+                get(Member::get_member).post(Member::add_member),
             )
             .route("/alive", get(|| async { StatusCode::OK }))
             .fallback(fallback)

@@ -45,7 +45,7 @@ impl Member {
             members
         })?;
 
-        std::thread::sleep(std::time::Duration::from_secs(1));
+        // std::thread::sleep(std::time::Duration::from_secs(1));
 
         Ok(Html(rendered))
     }
@@ -84,7 +84,7 @@ impl Member {
             .await
             .prepare(
                 r#"
-INSERT INTO Members(
+INSERT OR REPLACE INTO Members(
     MemberId,
     CardId,
     ECard,
@@ -136,58 +136,6 @@ VALUES (
 
         Ok(())
     }
-
-    pub async fn update_member(
-        State(state): State<Arc<AppState>>,
-        Path(id): Path<u32>,
-        Query(member): Query<Member>,
-    ) -> Result<(), crate::AppError> {
-        log::trace!("Updating member {member:?}");
-
-        let state = state.clone();
-        let _ = state
-            .db
-            .lock()
-            .await
-            .prepare(
-                r#"
-UPDATE Members
-SET
-    CardId=:card_id,
-    ECard=:ecard,
-    MemberTypeId=:member_type_id,
-    first_name=:first_name,
-    last_name=:last_name,
-    Address1=:addr1,
-    Address2=:addr2,
-    City=:city,
-    State=:state,
-    Zip=:zip,
-    Phone1=:phone1,
-    Phone2=:phone2,
-    Email=:email
-WHERE MemberId = :id
-"#,
-            )?
-            .execute(named_params! {
-                    ":id": id,
-                    ":card_id": member.card_id,
-                    ":ecard": member.e_card,
-                    ":member_type_id": member.member_type_id,
-                    ":first_name": member.first_name,
-                    ":last_name": member.last_name,
-                    ":addr1": member.addr1,
-                    ":addr2": member.addr2,
-                    ":city": member.city,
-                    ":state": member.state,
-                    ":zip": member.zip,
-                    ":phone1": member.phone1,
-                    ":phone2": member.phone2,
-                    ":email": member.email,
-            })?;
-
-        Ok(())
-    }
 }
 
 impl TryFrom<&rusqlite::Row<'_>> for Member {
@@ -199,8 +147,8 @@ impl TryFrom<&rusqlite::Row<'_>> for Member {
             card_id: row.get::<_, u32>("CardId")?,
             e_card: row.get::<_, u32>("ECard").ok(),
             member_type_id: row.get::<_, u32>("MemberTypeId")?,
-            first_name: row.get::<_, String>("first_name")?,
-            last_name: row.get::<_, String>("last_name")?,
+            first_name: row.get::<_, String>("FirstName")?,
+            last_name: row.get::<_, String>("LastName")?,
             addr1: row.get::<_, String>("Address1").ok(),
             addr2: row.get::<_, String>("Address2").ok(),
             city: row.get::<_, String>("City").ok(),
