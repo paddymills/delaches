@@ -65,7 +65,8 @@ def load_members():
             print(row)
             cur.execute(
                 """
-INSERT INTO Members VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO Members(MemberId,CardId,ECard,MemberType,StatusId,WorkFlag,FirstName,LastName,Address1,Address2,City,State,Zip,Phone1,Phone2,Email,Birthday,MemberDate)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """,
                 (
                     row["MemID"],
@@ -113,7 +114,8 @@ def load_transactions():
             print(row)
             cur.execute(
                 """
-INSERT INTO Transactions VALUES (?, ?, (
+INSERT INTO Transactions(Id,Timestamp,TransType,MemberId,Amount)
+VALUES (?, ?, (
     SELECT Id FROM DuesRates
     WHERE StartDate < ?
     AND (EndDate IS NULL OR EndDate > ?)
@@ -170,7 +172,8 @@ def load_transaction_types():
         print(row)
         cur.execute(
             """
-INSERT INTO DuesRates(MemberType, Description, StartDate, EndDate, Amount) VALUES (?, ?, ?, ?, ?)
+INSERT INTO DuesRates(MemberType,Description,StartDate,EndDate,Amount)
+VALUES (?, ?, ?, ?, ?)
 """,
             row,
         )
