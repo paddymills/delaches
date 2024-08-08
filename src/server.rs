@@ -42,18 +42,10 @@ impl AppServer {
         // build our application with a single route
         let app = Router::new()
             .route_service("/", ServeFile::new("public/index.html"))
-            .route_service("/members", ServeFile::new("public/members.html"))
             .nest_service("/assets", ServeDir::new("assets"))
             .nest_service("/style", ServeDir::new("style"))
             .route("/landing", get(landing))
-            .route(
-                "/members/list",
-                get(Member::get_members).post(Member::add_member),
-            )
-            .route(
-                "/members/:id",
-                get(Member::get_member).post(Member::add_member),
-            )
+            .nest("/members", Member::routes())
             .route("/alive", get(|| async { StatusCode::OK }))
             .fallback(fallback)
             .with_state(state);
