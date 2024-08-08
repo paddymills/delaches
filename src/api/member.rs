@@ -6,7 +6,7 @@ use axum::{
 };
 use std::sync::Arc;
 
-#[derive(Debug, Default, serde::Serialize, serde::Deserialize, sqlx::Type)]
+#[derive(Debug, Default, PartialEq, serde::Serialize, serde::Deserialize, sqlx::Type)]
 #[serde(rename_all = "PascalCase")]
 #[repr(u32)]
 pub enum MemberType {
@@ -16,7 +16,7 @@ pub enum MemberType {
     Lifetime = 3,
 }
 
-#[derive(Debug, Default, serde::Serialize, serde::Deserialize, sqlx::Type)]
+#[derive(Debug, Default, PartialEq, serde::Serialize, serde::Deserialize, sqlx::Type)]
 #[serde(rename_all = "PascalCase")]
 #[repr(u8)]
 pub enum MemberStatus {
@@ -55,6 +55,7 @@ pub struct Member {
 pub struct QueryParams {
     page: Option<u32>,
     search: Option<String>,
+    active: Option<bool>,
 }
 
 impl Member {
@@ -72,12 +73,19 @@ impl Member {
 
         let state = state.clone();
         let pool = &state.db;
-        let results: Vec<Self> = sqlx::query_as("SELECT * FROM Members")
+        let mut results: Vec<Self> = sqlx::query_as("SELECT * FROM Members")
             .fetch_all(pool)
             .await?;
 
         for m in results.iter() {
             log::debug!("{:?}", m)
+        }
+
+        if let Some(true) = params.active {
+            results = results
+                .into_iter()
+                .filter(|m| m.member_status == MemberStatus::Active)
+                .collect()
         }
 
         Ok(Json(results))

@@ -11,27 +11,34 @@
   </head>
   <body>
     <noscript>This webpage requires javascript to run.</noscript>
-    <main
-      x-data="{ members: [] }"
-      x-init="members = await (await fetch('/members')).json()"
-      style="text-align: center"
-    >
-      <table x-show="members.length > 0">
+    <main x-data="table">
+      <input type="text" x-model="searchTerm" x-effect="search()" />
+      <table>
         <thead class="ocean-gradient">
           <tr>
             <th>Member ID</th>
+            <th>Card ID</th>
             <th>First Name</th>
             <th>Last Name</th>
             <th>Address</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Zip</th>
+            <th>Due</th>
           </tr>
         </thead>
         <tbody>
           <template x-for="(member, index) in members">
             <tr>
               <td x-text="member.MemberId"></td>
+              <td x-text="member.CardId"></td>
               <td x-text="member.FirstName"></td>
               <td x-text="member.LastName"></td>
               <td x-text="member.Address1"></td>
+              <td x-text="member.City"></td>
+              <td x-text="member.State"></td>
+              <td x-text="member.Zip"></td>
+              <td><button>Pay</button></td>
             </tr>
           </template>
         </tbody>
@@ -43,4 +50,44 @@
       </table>
     </main>
   </body>
+  <script>
+    function findIn(x, term) {
+      return x != null && x.toString().toLowerCase().includes(term);
+    }
+    document.addEventListener("alpine:init", () => {
+      Alpine.data("table", () => ({
+        _members: [],
+        members: [],
+        searchTerm: "",
+
+        async init() {
+          let response = await fetch("/members?active=true");
+
+          this._members = await response.json();
+          console.log(this._members);
+        },
+
+        search() {
+          const term = this.searchTerm.toLowerCase();
+
+          this.members = this._members.filter((m) => {
+            return (
+              findIn(m.MemberId, term) ||
+              findIn(m.CardId, term) ||
+              findIn(m.FirstName, term) ||
+              findIn(m.LastName, term) ||
+              findIn(m.Address1, term) ||
+              findIn(m.Address2, term) ||
+              findIn(m.City, term) ||
+              findIn(m.State, term) ||
+              findIn(m.Zip, term) ||
+              findIn(m.Phone1, term) ||
+              findIn(m.Phone2, term) ||
+              findIn(m.Email, term)
+            );
+          });
+        },
+      }));
+    });
+  </script>
 </html>
