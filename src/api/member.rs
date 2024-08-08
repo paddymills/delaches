@@ -5,9 +5,31 @@ use axum::{
     routing::get,
     Router,
 };
+use chrono::NaiveDate;
 use minijinja::context;
 use rusqlite::named_params;
 use std::sync::Arc;
+
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "PascalCase")]
+#[repr(u32)]
+pub enum MemberType {
+    #[default]
+    Adult = 1,
+    Junior = 2,
+    Lifetime = 3,
+}
+
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "PascalCase")]
+#[repr(u8)]
+pub enum MemberStatus {
+    #[default]
+    Active = 1,
+    Inactive = 2,
+    Deceased = 3,
+    Deleted = 4,
+}
 
 #[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -15,7 +37,9 @@ pub struct Member {
     pub member_id: u32,
     pub card_id: u32,
     pub e_card: Option<u32>,
-    pub member_type_id: u32,
+    pub member_type: MemberType,
+    pub status_id: MemberStatus,
+    pub work_flag: bool,
     pub first_name: String,
     pub last_name: String,
     pub addr1: Option<String>,
@@ -26,10 +50,8 @@ pub struct Member {
     pub phone1: Option<String>,
     pub phone2: Option<String>,
     pub email: Option<String>,
-    pub status_id: u32,
-    pub birthday: Option<String>,
-    pub member_date: Option<String>,
-    pub work_flag: bool,
+    pub birthday: Option<chrono::NaiveDate>,
+    pub member_date: Option<chrono::NaiveDate>,
 }
 
 #[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
@@ -168,7 +190,7 @@ VALUES (
                 ":member_id": member.member_id,
                 ":card_id": member.card_id,
                 ":ecard": member.e_card,
-                ":member_type_id": member.member_type_id,
+                ":member_type_id": member.member_type,
                 ":first_name": member.first_name,
                 ":last_name": member.last_name,
                 ":addr1": member.addr1,
@@ -209,7 +231,9 @@ impl TryFrom<&rusqlite::Row<'_>> for Member {
             member_id: row.get::<_, u32>("MemberId")?,
             card_id: row.get::<_, u32>("CardId")?,
             e_card: row.get::<_, u32>("ECard").ok(),
-            member_type_id: row.get::<_, u32>("MemberTypeId")?,
+            member_type: row.get::<_, String>("MemberType")?,
+            status_id: row.get::<_, u32>("StatusId")?,
+            work_flag: row.get::<_, bool>("WorkFlag")?,
             first_name: row.get::<_, String>("FirstName")?,
             last_name: row.get::<_, String>("LastName")?,
             addr1: row.get::<_, String>("Address1").ok(),
@@ -220,10 +244,8 @@ impl TryFrom<&rusqlite::Row<'_>> for Member {
             phone1: row.get::<_, String>("Phone1").ok(),
             phone2: row.get::<_, String>("Phone2").ok(),
             email: row.get::<_, String>("Email").ok(),
-            status_id: row.get::<_, u32>("StatusId")?,
-            birthday: row.get::<_, String>("Birthday").ok(),
-            member_date: row.get::<_, String>("MemberDate").ok(),
-            work_flag: row.get::<_, bool>("WorkFlag")?,
+            birthday: row.get::<_, NaiveDate>("Birthday").ok(),
+            member_date: row.get::<_, NaiveDate>("MemberDate").ok(),
         })
     }
 }
