@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use clap::Parser;
 
 type Error = delaches::AppError;
@@ -11,21 +9,9 @@ pub struct Cli {
     /// port to run server on
     #[arg(short, long, default_value_t = 3000)]
     port: u32,
-
-    /// logging name
-    #[arg(long, default_value_t = String::from("server"))]
-    log_name: String,
-
-    /// create database
-    #[arg(long)]
-    init_db: bool,
-
-    /// import csv file(s) into the database
-    #[arg(short, long, num_args = 0..)]
-    load: Option<Vec<PathBuf>>,
 }
 
-fn init_logging(name: &str) -> Result<(), Error> {
+fn init_logging() -> Result<(), Error> {
     // build logging for our application
     fern::Dispatch::new()
         .format(|out, message, record| {
@@ -49,7 +35,7 @@ fn init_logging(name: &str) -> Result<(), Error> {
                     .create(true)
                     .truncate(true)
                     .write(true)
-                    .open(format!("logs/{name}.log"))?,
+                    .open(format!("logs/server.log"))?, // TODO: daily log file
             ),
         )
         .apply()?;
@@ -60,29 +46,9 @@ fn init_logging(name: &str) -> Result<(), Error> {
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let args = Cli::parse();
-    init_logging(&args.log_name)?;
+    init_logging()?;
 
-    let mut run_server = true;
-    if args.init_db {
-        let db = rusqlite::Connection::open("db.sqlite")?;
-        db.execute_batch(include_str!("schema.sql"))?;
-        run_server = false;
-    }
-
-    if let Some(files) = args.load {
-        if !delaches::server::AppServer::is_running(args.port).await {
-            return Err(Error::CsvParsingError(String::from(
-                "Server needs to be running for files to be loaded",
-            )));
-        }
-
-        delaches::csv::load_csv_files(files).await?;
-        run_server = false;
-    }
-
-    if run_server {
-        delaches::server::AppServer::serve(args.port).await?;
-    }
+    delaches::server::AppServer::serve(args.port).await?;
 
     Ok(())
 }
