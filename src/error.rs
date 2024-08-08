@@ -10,7 +10,9 @@ pub enum AppError {
     #[error(transparent)]
     TemplateError(#[from] minijinja::Error),
     #[error(transparent)]
-    SqliteError(#[from] rusqlite::Error),
+    SqlxError(#[from] sqlx::Error),
+    #[error(transparent)]
+    SqliteError(#[from] sqlx::sqlite::SqliteError),
     #[error(transparent)]
     CsvError(#[from] csv::Error),
     #[error("Requested resource not found")]

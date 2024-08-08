@@ -5,13 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
     <link rel="stylesheet" href="/style/base.css" />
-    <script defer src="/assets/htmx.min.js"></script>
+    <link rel="stylesheet" href="/style/table.css" />
+    <script defer src="/assets/alpine.min.js"></script>
     <title>Delaches Member Management</title>
   </head>
   <body>
     <noscript>This webpage requires javascript to run.</noscript>
-    <main hx-get="landing" hx-trigger="load" style="text-align: center">
-      loading...
+    <main
+      x-data="{ members: [] }"
+      x-init="members = await (await fetch('/members')).json()"
+      style="text-align: center"
+    >
+      <table x-show="members.length > 0">
+        <thead class="ocean-gradient">
+          <tr>
+            <th>Member ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="(member, index) in members">
+            <tr>
+              <td x-text="member.MemberId"></td>
+              <td x-text="member.FirstName"></td>
+              <td x-text="member.LastName"></td>
+              <td x-text="member.Address1"></td>
+            </tr>
+          </template>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="100">pagination and such</td>
+          </tr>
+        </tfoot>
+      </table>
     </main>
   </body>
 </html>

@@ -5,6 +5,7 @@ import re
 
 IS_CUR = re.compile(r"^\$\d+\.\d+$")
 IS_INT = re.compile(r"^\d+$")
+IS_DATE = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
 
 
 def main():
@@ -39,6 +40,9 @@ def fmt_csv_vals(row):
             row[k] = float(v[1:])
         elif IS_INT.match(v):
             row[k] = int(v)
+        elif IS_DATE.match(v):
+            month, day, year = [int(x) for x in IS_DATE.match(v).groups()]
+            row[k] = f"{year}-{month:02}-{day:02}"
 
     return row
 
@@ -61,11 +65,13 @@ def load_members():
                 row["Zip"] = _zip
             except:
                 pass
+            if row["StatusID"] == 0:
+                row["StatusID"] = 1
 
             print(row)
             cur.execute(
                 """
-INSERT INTO Members(MemberId,CardId,ECard,MemberType,StatusId,WorkFlag,FirstName,LastName,Address1,Address2,City,State,Zip,Phone1,Phone2,Email,Birthday,MemberDate)
+INSERT INTO Members(MemberId,CardId,ECard,MemberType,MemberStatus,WorkFlag,FirstName,LastName,Address1,Address2,City,State,Zip,Phone1,Phone2,Email,Birthday,MemberDate)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """,
                 (
