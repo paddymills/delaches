@@ -78,7 +78,7 @@ impl Member {
             .await?;
 
         for m in results.iter() {
-            log::debug!("{:?}", m)
+            log::trace!("{:?}", m)
         }
 
         if let Some(true) = params.active {
