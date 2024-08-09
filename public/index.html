@@ -39,7 +39,14 @@
               <td x-text="member.CardId"></td>
               <td x-text="member.FirstName"></td>
               <td x-text="member.LastName"></td>
-              <td><button @click="pay(member.MemberId)">Pay</button></td>
+              <td>
+                <button
+                  @click="pay(member.MemberId)"
+                  x-text="dollarFmt.format(member.Dues)"
+                >
+                  Pay
+                </button>
+              </td>
             </tr>
           </template>
         </tbody>
@@ -47,6 +54,10 @@
     </main>
   </body>
   <script>
+    const dollarFmt = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
     function findIn(x, term) {
       return x != null && x.toString().toLowerCase().includes(term);
     }
@@ -68,7 +79,7 @@
           clearInterval(this.refetch);
         },
         async getMembers() {
-          let response = await fetch("/members?active=true");
+          let response = await fetch("/members/dues");
           this._members = await response.json();
           // console.log(this._members);
         },

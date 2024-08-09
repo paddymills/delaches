@@ -51,17 +51,30 @@ pub struct Member {
     pub member_date: Option<time::Date>,
 }
 
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
+#[serde(rename_all = "PascalCase")]
+#[sqlx(rename_all = "PascalCase")]
+pub struct MemberDues {
+    pub member_id: u32,
+    pub card_id: u32,
+    pub first_name: String,
+    pub last_name: String,
+    pub dues: f64,
+}
+
 #[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct QueryParams {
     page: Option<u32>,
     search: Option<String>,
     active: Option<bool>,
+    id: Option<u32>,
 }
 
 impl Member {
     pub fn routes() -> Router<Arc<AppState>> {
         Router::new()
             .route("/", get(Self::get_members).post(Self::add_member))
+            .route("/dues", get(Self::get_dues).post(Self::pay_dues))
             .route("/:id", get(Self::get_member).delete(Self::delete_member))
     }
 
@@ -89,6 +102,68 @@ impl Member {
         }
 
         Ok(Json(results))
+    }
+
+    async fn get_dues(
+        State(state): State<Arc<AppState>>,
+    ) -> Result<Json<Vec<MemberDues>>, crate::AppError> {
+        log::info!("Get member dues listing");
+
+        let state = state.clone();
+        let pool = &state.db;
+        let results = sqlx::query_as(
+            r#"
+SELECT
+    MemberId,
+    CardId,
+    FirstName,
+    LastName,
+    Amount AS Dues
+FROM Members
+INNER JOIN
+    (SELECT * FROM DuesRates WHERE EndDate IS NULL) AS Dues
+    ON Dues.MemberType=Members.MemberType
+WHERE MemberStatus = (SELECT Id FROM MemberStatus WHERE Description = 'Active')
+AND Dues > 0
+AND MemberId NOT IN (SELECT MemberId FROM Transactions WHERE Timestamp > DATE('now','start of year'))
+"#,
+        )
+        .fetch_all(pool)
+        .await?;
+
+        for m in results.iter() {
+            log::trace!("{:?}", m)
+        }
+
+        Ok(Json(results))
+    }
+
+    async fn pay_dues(
+        State(state): State<Arc<AppState>>,
+        Query(params): Query<QueryParams>,
+    ) -> Result<Json<bool>, crate::AppError> {
+        match params.id {
+            Some(id) => {
+                let state = state.clone();
+                let pool = &state.db;
+                let updates = sqlx::query(
+                    r#"
+INSERT INTO Transactions(TransactionType, MemberId, Amount)
+SELECT Id, $1, Amount FROM DuesRates
+WHERE EndDate IS NULL AND MemberType = (SELECT MemberType FROM Member WHERE MemberId=$1)
+"#,
+                )
+                .bind(id)
+                .execute(pool)
+                .await?
+                .rows_affected();
+
+                Ok(Json(updates == 1))
+            }
+            None => Err(crate::AppError::NotFound(String::from(
+                "No id given to pay dues for",
+            ))),
+        }
     }
 
     async fn get_member(
