@@ -8,8 +8,6 @@ pub enum AppError {
     #[error(transparent)]
     LoggingError(#[from] log::SetLoggerError),
     #[error(transparent)]
-    TemplateError(#[from] minijinja::Error),
-    #[error(transparent)]
     SqlxError(#[from] sqlx::Error),
     #[error(transparent)]
     SqliteError(#[from] sqlx::sqlite::SqliteError),

@@ -425,7 +425,6 @@ dependencies = [
  "fern",
  "humantime",
  "log",
- "minijinja",
  "reqwest",
  "serde",
  "sqlx",
@@ -1043,15 +1042,6 @@ checksum = "f7c44f8e672c00fe5308fa235f821cb4198414e1c77935c1ab6948d3fd78550e"
 dependencies = [
  "mime",
  "unicase",
-]
-
-[[package]]
-name = "minijinja"
-version = "2.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4bf71af278c578cbcc91d0b1ff092910208bc86f7b3750364642bd424e3dcd3"
-dependencies = [
- "serde",
 ]
 
 [[package]]
