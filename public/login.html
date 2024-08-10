@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+    <link rel="stylesheet" href="/style/base.css" />
+    <script defer src="/assets/alpine.min.js"></script>
+    <title>Delaches Member Management</title>
+    <style>
+      :root {
+        --amber-300: #fcd34d;
+        --orange-500: #f97316;
+        --slate-300: #cbd5e1;
+        --slate-400: #94a3b8;
+        --sky-500: #0ea5e9;
+      }
+
+      button {
+        margin: 0.5rem;
+        padding: 1rem;
+        border-style: none;
+        border-radius: 1em;
+        background: linear-gradient(
+          45deg,
+          var(--slate-300) 0%,
+          var(--slate-400) 100%
+        );
+      }
+
+      button:hover {
+        outline: 0.25em solid var(--sky-500);
+      }
+
+      input {
+        border: 1px solid black;
+        border-radius: 1em;
+        background: white;
+        padding: 0.5em;
+        min-height: 1em;
+        text-align: center;
+      }
+
+      .form {
+        border-radius: 2rem;
+        padding: 1rem 2rem;
+        background: linear-gradient(
+          45deg,
+          var(--amber-300) 0%,
+          var(--orange-500) 100%
+        );
+      }
+
+      .form > div {
+        padding: 1rem 0;
+      }
+
+      .submit {
+        display: grid;
+      }
+
+      .keypad {
+        display: grid;
+        border-top: 1px solid black;
+        border-bottom: 1px solid black;
+        grid-template-columns: 5rem 5rem 5rem;
+        gap: 0.5rem;
+      }
+
+      .keypad > button:last-child {
+        grid-column-start: 2;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>This webpage requires javascript to run.</noscript>
+    <header><h1>Login</h1></header>
+    <main x-data="state">
+      <div class="form">
+        <div class="code">
+          <input x-model="codeView" disabled />
+          <button class="clear" @click="code = codeView = ''">clear</button>
+        </div>
+        <div class="keypad">
+          <template x-for="char in chars">
+            <button @click="setCode(char)" x-text="char"></button>
+          </template>
+        </div>
+        <div class="submit">
+          <button @click="submit">Submit</button>
+        </div>
+      </div>
+    </main>
+  </body>
+  <script>
+    document.addEventListener("alpine:init", () => {
+      Alpine.data("state", () => ({
+        chars: [...Array(9).keys(), -1].map((x) => x + 1),
+        code: "",
+        codeView: "",
+        timer: null,
+
+        async setCode(char) {
+          // cancel any previous input hiding timers
+          clearTimeout(this.timer);
+
+          // hide any previous input and push character onto code
+          this.code += char;
+          this.codeView += char;
+
+          // set timer to hide code
+          this.timer = setTimeout(
+            () => (this.codeView = "*".repeat(this.codeView.length)),
+            500
+          );
+          await this.timer;
+        },
+        async submit() {
+          let response = await fetch("/auth", {
+            method: "POST",
+            redirect: "follow",
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+              Authorization: `${this.code}`,
+            },
+          });
+
+          if (response.ok) {
+            if (response.redirected) {
+              window.location.href = response.url;
+            }
+          } else {
+            console.log(response);
+            alert("Invalid code");
+            this.code = this.codeView = "";
+          }
+        },
+      }));
+    });
+  </script>
+</html>

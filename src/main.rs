@@ -1,4 +1,5 @@
 use clap::Parser;
+use delaches::Config;
 
 type Error = delaches::AppError;
 
@@ -7,8 +8,8 @@ type Error = delaches::AppError;
 /// Delaches member management system server
 pub struct Cli {
     /// port to run server on
-    #[arg(short, long, default_value_t = 3000)]
-    port: u32,
+    #[arg(short, long)]
+    port: Option<u32>,
 }
 
 fn init_logging() -> Result<(), Error> {
@@ -45,10 +46,19 @@ fn init_logging() -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let args = Cli::parse();
     init_logging()?;
 
-    delaches::server::AppServer::serve(args.port).await?;
+    let args = Cli::parse();
+
+    // config.toml
+    let contents = std::fs::read_to_string("config.toml")?;
+    let mut config = toml::from_str::<Config>(&contents)?;
+
+    if let Some(port) = args.port {
+        config.port = port;
+    }
+
+    delaches::server::AppServer::serve(config).await?;
 
     Ok(())
 }

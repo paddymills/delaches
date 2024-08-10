@@ -6,6 +6,8 @@ pub enum AppError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
     #[error(transparent)]
+    ConfigError(#[from] toml::de::Error),
+    #[error(transparent)]
     LoggingError(#[from] log::SetLoggerError),
     #[error(transparent)]
     SqlxError(#[from] sqlx::Error),
@@ -19,6 +21,8 @@ pub enum AppError {
     CsvParsingError(String),
     #[error(transparent)]
     ReqwestError(#[from] reqwest::Error),
+    #[error("Access Denied")]
+    AccessDenied,
 }
 
 // Tell axum how to convert `AppError` into a response.
