@@ -4,12 +4,34 @@
   --grey-400: #9ca3af;
 }
 
-table {
+.table-container {
   border: 1px solid var(--grey-200);
   border-radius: 1rem;
+  overflow-y: scroll;
+  height: 80vh;
+}
+
+table {
   border-spacing: 0;
   margin: auto;
   overflow: hidden;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+}
+
+tbody {
+  overflow-y: auto;
+  height: 80vh;
+}
+
+tbody > tr {
+  background-color: white;
+}
+tbody > tr:hover {
+  background-color: var(--slate-200);
 }
 
 th {
@@ -23,10 +45,6 @@ td,
 th {
   padding-left: 1rem;
   padding-right: 1rem;
-}
-
-tbody > tr:hover {
-  background-color: var(--slate-200);
 }
 
 button {
