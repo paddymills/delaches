@@ -118,14 +118,15 @@ SELECT
     CardId,
     FirstName,
     LastName,
-    Amount AS Dues
+	CASE WHEN MemberId NOT IN (SELECT MemberId FROM Transactions WHERE Timestamp > DATE('now','start of year'))
+		THEN Amount
+		ELSE 0.0
+	END AS Dues
 FROM Members
-INNER JOIN
+LEFT OUTER JOIN
     (SELECT * FROM DuesRates WHERE EndDate IS NULL) AS Dues
     ON Dues.MemberType=Members.MemberType
 WHERE MemberStatus = (SELECT Id FROM MemberStatus WHERE Description = 'Active')
-AND Dues > 0
-AND MemberId NOT IN (SELECT MemberId FROM Transactions WHERE Timestamp > DATE('now','start of year'))
 "#,
         )
         .fetch_all(pool)
@@ -148,9 +149,9 @@ AND MemberId NOT IN (SELECT MemberId FROM Transactions WHERE Timestamp > DATE('n
                 let pool = &state.db;
                 let updates = sqlx::query(
                     r#"
-INSERT INTO Transactions(TransactionType, MemberId, Amount)
+INSERT INTO Transactions(TransType, MemberId, Amount)
 SELECT Id, $1, Amount FROM DuesRates
-WHERE EndDate IS NULL AND MemberType = (SELECT MemberType FROM Member WHERE MemberId=$1)
+WHERE EndDate IS NULL AND MemberType = (SELECT MemberType FROM Members WHERE MemberId=$1)
 "#,
                 )
                 .bind(id)
