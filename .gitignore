@@ -1,5 +1,6 @@
 /data
+/dist
 /target
 /logs
 *.sqlite
-config.toml
+/config.toml
