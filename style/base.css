@@ -1,4 +1,7 @@
-@import url("colors.css");
+:root {
+  --cyan-500: #06b6d4;
+  --blue-500: #3b82f6;
+}
 
 body {
   font-family: sans-serif;
