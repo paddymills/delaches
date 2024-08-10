@@ -3,6 +3,7 @@ use delaches::Config;
 
 type Error = delaches::AppError;
 
+// TODO: config generate
 #[derive(Debug, clap::Parser)]
 #[command(version, about)]
 /// Delaches member management system server
