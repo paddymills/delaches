@@ -28,8 +28,8 @@ impl FromRequestParts<Arc<AppState>> for Auth {
         req: &mut Parts,
         state: &Arc<AppState>,
     ) -> Result<Self, Self::Rejection> {
-        log::debug!("Auth Parts: {:?}", req);
-        log::debug!("Auth State: {:?}", state);
+        log::trace!("Auth Parts: {:?}", req);
+        log::trace!("Auth State: {:?}", state);
 
         let cookies = Cookies::from_request_parts(req, state).await.unwrap();
         let state = state.clone();
@@ -49,9 +49,8 @@ impl FromRequestParts<Arc<AppState>> for Auth {
 
         // in the case of the login page, we will ahve an authorization header
         if let Some(code) = req.headers.get(header::AUTHORIZATION) {
-            log::debug!("Auth code: {:?}", code);
             if *code == state.auth_code {
-                log::debug!("Authenticated!");
+                log::trace!("Authenticated!");
 
                 // generate token somewhat random token
                 let token = Alphanumeric.sample_string(&mut rand::thread_rng(), 16);
@@ -59,6 +58,7 @@ impl FromRequestParts<Arc<AppState>> for Auth {
 
                 let mut cookie = Cookie::new(COOKIE_NAME, token);
                 cookie.set_same_site(SameSite::Strict);
+                log::trace!("Authenticated. Adding new cookie: {:?}", code);
                 let _ = cookies.add(cookie);
 
                 return Ok(Auth {});
