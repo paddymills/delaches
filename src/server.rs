@@ -1,32 +1,37 @@
-use crate::api::Member;
-use crate::user::User;
-use axum::extract::State;
 use axum::http::StatusCode;
-use axum::{response::Html, routing::get, Router};
-use minijinja::{context, Environment};
+use axum::middleware;
+use axum::response::{Html, IntoResponse, Redirect};
+use axum::routing::{get, post};
+use axum::Router;
+use dotenv::dotenv;
+use sqlx::SqlitePool;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-
 use tower_http::services::{ServeDir, ServeFile};
 
+use crate::api::Member;
+use crate::auth::Auth;
+
+#[derive(Debug)]
 pub struct AppState {
-    pub fragments: Environment<'static>,
-    pub db: Arc<Mutex<rusqlite::Connection>>,
+    pub db: SqlitePool,
+    pub tokens: Mutex<Vec<String>>,
+    pub auth_code: String,
 }
 
 impl AppState {
-    fn new() -> Result<Self, crate::AppError> {
-        let mut fragments = Environment::new();
-
-        // load fragment templates
-        fragments.add_template("members", include_str!("templates/members.jinja"))?;
-        fragments.add_template("member", include_str!("templates/member.jinja"))?;
-        fragments.add_template("landing", include_str!("templates/landing.jinja"))?;
+    async fn new(auth_code: String) -> Result<Self, crate::AppError> {
+        // init env
+        dotenv().unwrap();
 
         // init database
-        let db = Arc::new(Mutex::new(rusqlite::Connection::open("db.sqlite")?));
+        let db = SqlitePool::connect(&dotenv::var("DATABASE_URL").unwrap()).await?;
 
-        Ok(Self { fragments, db })
+        Ok(Self {
+            db,
+            tokens: Mutex::new(Vec::new()),
+            auth_code,
+        })
     }
 }
 
@@ -34,26 +39,45 @@ impl AppState {
 pub struct AppServer {}
 
 impl AppServer {
-    pub async fn serve(port: u32) -> Result<(), crate::AppError> {
-        // init state
-        let state = Arc::new(AppState::new()?);
+    pub async fn serve(config: crate::Config) -> Result<(), crate::AppError> {
+        // TODO: make private key
+        let my_key: &[u8] = &[0; 64]; // Your real key must be cryptographically random
+        crate::auth::KEY.set(tower_cookies::Key::from(my_key)).ok();
 
-        // TODO: authentication
-        // build our application with a single route
-        let app = Router::new()
+        // init state
+        let state = Arc::new(AppState::new(config.code).await?);
+
+        // authenticated routes
+        let with_auth = Router::new()
             .route_service("/", ServeFile::new("public/index.html"))
+            .nest("/members", Member::routes())
+            .route(
+                "/auth",
+                post(|| async { Redirect::to("/").into_response() }),
+            )
+            .route_layer(
+                middleware::from_extractor_with_state::<Auth, Arc<AppState>>(state.clone()),
+            )
+            .layer(tower_cookies::CookieManagerLayer::new());
+
+        // unauthenticated routes
+        let without_auth = Router::new()
+            .route_service("/login", ServeFile::new("public/login.html"))
             .nest_service("/assets", ServeDir::new("assets"))
             .nest_service("/style", ServeDir::new("style"))
-            .route("/landing", get(landing))
-            .nest("/members", Member::routes())
-            .route("/alive", get(|| async { StatusCode::OK }))
+            .route("/alive", get(|| async { StatusCode::OK }));
+
+        // build our application with a merged routes
+        let app = Router::new()
+            .merge(with_auth)
+            .merge(without_auth)
             .fallback(fallback)
             .with_state(state);
 
         // run our app with hyper, listening globally on port 3000
-        let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
-        log::info!("server is running at http://localhost:{}", port);
-        axum::serve(listener, app).await?;
+        let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", config.port)).await?;
+        log::info!("server is running at http://localhost:{}", config.port);
+        axum::serve(listener, app.into_make_service()).await?;
 
         Ok(())
     }
@@ -65,18 +89,6 @@ impl AppServer {
             _ => false,
         }
     }
-}
-
-async fn landing(State(state): State<Arc<AppState>>) -> Result<Html<String>, StatusCode> {
-    let template = state.fragments.get_template("landing").unwrap();
-
-    let rendered = template
-        .render(context! {
-            user => User::Admin
-        })
-        .unwrap();
-
-    Ok(Html(rendered))
 }
 
 async fn fallback() -> (StatusCode, Html<&'static str>) {

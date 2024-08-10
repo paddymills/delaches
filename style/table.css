@@ -1,4 +1,8 @@
-@import url("colors.css");
+:root {
+  --slate-200: #e2e8f0;
+  --grey-200: #e5e7eb;
+  --grey-400: #9ca3af;
+}
 
 table {
   border: 1px solid var(--grey-200);
@@ -23,4 +27,9 @@ th {
 
 tbody > tr:hover {
   background-color: var(--slate-200);
+}
+
+button {
+  padding: 0.75em;
+  margin: 0.5em;
 }

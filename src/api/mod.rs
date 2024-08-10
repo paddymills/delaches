@@ -2,4 +2,4 @@ mod member;
 mod transaction;
 
 pub use member::Member;
-pub use transaction::{Transaction, TransactionType};
+pub use transaction::{DuesRates, Transaction};

@@ -1,4 +1,7 @@
-@import url("colors.css");
+:root {
+  --cyan-500: #06b6d4;
+  --blue-500: #3b82f6;
+}
 
 body {
   font-family: sans-serif;
@@ -10,13 +13,18 @@ main {
   margin: auto;
   padding: 1rem;
   display: grid;
-  align-items: center;
-  align-content: center;
+  row-gap: 1rem;
+  align-content: start;
+  align-items: start;
   justify-content: center;
 }
 
 .ocean-gradient {
   background: linear-gradient(45deg, var(--cyan-500) 0%, var(--blue-500) 100%);
+}
+
+input {
+  justify-self: center;
 }
 
 a {

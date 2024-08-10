@@ -6,11 +6,13 @@ pub enum AppError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
     #[error(transparent)]
+    ConfigError(#[from] toml::de::Error),
+    #[error(transparent)]
     LoggingError(#[from] log::SetLoggerError),
     #[error(transparent)]
-    TemplateError(#[from] minijinja::Error),
+    SqlxError(#[from] sqlx::Error),
     #[error(transparent)]
-    SqliteError(#[from] rusqlite::Error),
+    SqliteError(#[from] sqlx::sqlite::SqliteError),
     #[error(transparent)]
     CsvError(#[from] csv::Error),
     #[error("Requested resource not found")]
@@ -19,6 +21,8 @@ pub enum AppError {
     CsvParsingError(String),
     #[error(transparent)]
     ReqwestError(#[from] reqwest::Error),
+    #[error("Access Denied")]
+    AccessDenied,
 }
 
 // Tell axum how to convert `AppError` into a response.
