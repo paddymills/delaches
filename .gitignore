@@ -1,9 +1,11 @@
-/data
-/dist
-/target
-/logs
-*.sqlite
-/config.toml
-
+# python ignore
 /venv
 __pycache__/
+
+# flask data
+/instance
+/migrations
+
+# data
+*.log
+*.sqlite
