@@ -1,7 +1,7 @@
 
 from members import create_app, db
 from flask_migrate import upgrade, migrate, init, stamp
-from members.models import User
+from members.models import *
 
 def deploy():
     """Run deployment tasks."""
@@ -9,6 +9,13 @@ def deploy():
     app = create_app()
     app.app_context().push()
     db.create_all()
+    
+    # TODO: cli to get pins
+    db.session.add_all([
+        User(pin=1234, user='bar'),
+        User(pin=5678, user='admin'),
+    ])
+    db.session.commit()
 
     # migrate database to latest revision
     init()
@@ -16,8 +23,4 @@ def deploy():
     migrate()
     upgrade()
 
-# TODO: change pin function
-
-#if __name__ == "__main__":
-# TODO: cli
 deploy()
