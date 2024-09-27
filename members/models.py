@@ -8,6 +8,7 @@ class User(UserMixin, db.Model):
 
 	pin = db.Column(db.Integer, primary_key=True)
 	user = db.Column(db.String(64), unique=True)
+	api_key = db.Column(db.String(64))
 
 	def get_id(self):
 		return str(self.pin)

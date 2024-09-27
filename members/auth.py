@@ -34,3 +34,14 @@ def authenticate():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+@login_manager.request_loader
+def load_user_from_request(request):
+    api_key = request.headers.get('Api-Key')
+    if api_key:
+        logger.info("authentication requested with API key: {}".format(api_key))
+        user = User.query.filter_by(api_key=api_key).first()
+        if user:
+            return user
+
+    return None
