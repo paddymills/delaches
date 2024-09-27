@@ -1,8 +1,8 @@
-set windows-shell : ["powershell.exe", "-Command"]
+set windows-shell := ["powershell.exe", "-Command"]
 
-export FLASK_APP=routes.py
-export FLASK_DEBUG=1
-export FLASK_ENV=development
+export FLASK_APP := "members"
+export FLASK_DEBUG := "1"
+export FLASK_ENV := "development"
 
 dev:
     source venv/bin/activate
