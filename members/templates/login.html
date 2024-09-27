@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
-    <link rel="stylesheet" href="/style/base.css" />
-    <script defer src="/assets/alpine.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="/static/base.css" />
+    <script defer src="/static/alpine.min.js"></script>
     <title>Delaches Member Management</title>
     <style>
       :root {
@@ -116,7 +116,7 @@
           await this.timer;
         },
         async submit() {
-          let response = await fetch("/auth", {
+          let response = await fetch("/login", {
             method: "POST",
             redirect: "follow",
             headers: {
