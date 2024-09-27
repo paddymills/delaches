@@ -1,16 +1,16 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, send_from_directory
 from . import db
 
 main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    return 'Index'
+    return render_template('index.html')
 
-@main.route('/profile')
-def profile():
-    return 'Profile'
+@main.route('/static/<path:name>')
+def static(name):
+    return send_from_directory('static', name)
 
-@app.errorhandler(404)
+@main.errorhandler(404)
 def not_found(error):
-    resp = render_template('static/404.html'), 404
+    return render_template('404.html'), 404
