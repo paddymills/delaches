@@ -2,40 +2,58 @@
 
 Delaches member management
 
-# Build
+# Install
 
-```bash
-cargo build --release
+
+```powershell
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py --deploy
+```
+
+## Import data
+```
+python manage.py --load path/to/excel/file
+```
+
+## Configure
+Using something like [SQLite Studio]() change the pin codes
+(in the users) table.
+
+# Develop
+
+```
+flask run
 ```
 
 # Deploy
 
-Make sure you grab all the static assets:
-
-- `/assets/
-- `/public`
-- `/style`
-- `/.env`
-
-Might also want the `import_data.py` script for utility purposes
-
-Create a `config.toml` file as
-
-```toml
-port = 3000
-code = "<some secret numerical pin>"
+```
+waitress-serve call members:create_app
 ```
 
-# run
+navigate to `localhost:8080`
 
-`./delaches`
+# Reverse proxy
+If you don't want to have to navigate to the site using the port
 
-## Hot reload
+install and nginx from https://nginx.org/en/download.html
 
-Keep in mind that the authentication tokens are stored in memory. So, a reload of the server resets all authentication.
-
-Use [watchexec](https://watchexec.github.io/) to reload on config file changes.
-
-```bash
-watchexec --restart --watch config.toml -- delaches
+C:\nginx\nginx.conf
 ```
+server {
+    listen 80;
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Prefix /;
+    }
+}
+```
+
+
