@@ -29,14 +29,28 @@
               <th>Member ID</th>
               <th>First Name</th>
               <th>Last Name</th>
+              <th>Address</th>
+              <th>City</th>
+              <th>State</th>
+              <th>Zip</th>
+              <th>Birthdate</th>
+              <th>Phone</th>
+              <th>Email</th>
             </tr>
           </thead>
           <tbody>
             <template x-for="(member, index) in members">
-              <tr>
+              <tr @click="() => window.location.href =`/members/${member.id}`">
                 <td x-text="member.id"></td>
                 <td x-text="member.first_name"></td>
                 <td x-text="member.last_name"></td>
+                <td x-text="member.address"></td>
+                <td x-text="member.city"></td>
+                <td x-text="member.state"></td>
+                <td x-text="member.zip"></td>
+                <td x-text="new Date(member.birthdate).toLocaleDateString('en-US')"></td>
+                <td x-text="member.phone"></td>
+                <td x-text="member.email"></td>
               </tr>
             </template>
           </tbody>
@@ -87,33 +101,6 @@
           });
         },
 
-        async pay(memberId, type, amount) {
-          // post payment to backend
-          console.log(`Marking payment for member ${memberId}`);
-          let response = await fetch(`/members/${memberId}`, {
-            method: "POST",
-            headers: {
-              "Content-type": "application/json",
-            },
-            body: JSON.stringify({"paymentType": type, "amount": amount}),
-          });
-
-          if (response.ok) {
-            console.log("Payment saved");
-            const json = await response.json();
-            console.log(json);
-
-            // print receipt
-            let w = window.open(`/members/transactions/${json.transactionId}`);
-            w.print()
-            // w.close()
-          } else {
-            console.log(response);
-            alert("Failed to save payment");
-          }
-
-          await this.getMembers();
-        },
       }));
     });
   </script>
