@@ -12,11 +12,6 @@
   <body>
     <noscript>This webpage requires javascript to run.</noscript>
     <header><h1>Delaches Active Members</h1></header>
-    {% if current_user.is_authenticated and current_user.user == 'admin' %}
-      <form action="/members" method="post">
-        <button style="position: absolute; top: 1rem; left: 1rem;">Manage Members</button>
-      </form>
-    {% endif %}
     <main x-data="table">
       <div>
         <label for="search">Search:</label>
@@ -34,8 +29,6 @@
               <th>Member ID</th>
               <th>First Name</th>
               <th>Last Name</th>
-              <th>Dues</th>
-              <th>Key Fob</th>
             </tr>
           </thead>
           <tbody>
@@ -44,27 +37,6 @@
                 <td x-text="member.id"></td>
                 <td x-text="member.first_name"></td>
                 <td x-text="member.last_name"></td>
-                <td>
-                  <template x-if="member.dues > 0">
-                    <button
-                      @click="pay(member.id, 'dues', member.dues)"
-                      x-text="dollarFmt.format(member.dues)"
-                    >
-                      Pay
-                    </button>
-                  </template>
-                  <template x-if="member.dues <= 0">
-                    <button disabled>Paid</button>
-                  </template>
-                </td>
-                <td>
-                  <button
-                    @click="pay(member.id, 'fob', member.fob)"
-                    x-text="dollarFmt.format(member.fob)"
-                  >
-                    Key Fob
-                  </button>
-                </td>
               </tr>
             </template>
           </tbody>

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def create_app():
     # init logging
-    logging.basicConfig(filename='server.log', level=logging.INFO)
+    logging.basicConfig(filename='server.log', level=logging.DEBUG)
 
     app = Flask(__name__)
 
@@ -33,5 +33,9 @@ def create_app():
     # blueprint for non-auth parts of app
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
+
+    # blueprint for members api
+    from .members import members as members_blueprint
+    app.register_blueprint(members_blueprint)
 
     return app
