@@ -13,7 +13,7 @@
     <noscript>This webpage requires javascript to run.</noscript>
     <header><h1>Delaches Active Members</h1></header>
     {% if current_user.is_authenticated and current_user.user == 'admin' %}
-      <form action="/members" method="post">
+      <form action="/members">
         <button style="position: absolute; top: 1rem; left: 1rem;">Manage Members</button>
       </form>
     {% endif %}
