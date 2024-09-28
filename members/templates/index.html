@@ -118,7 +118,7 @@
         async pay(memberId, type, amount) {
           // post payment to backend
           console.log(`Marking payment for member ${memberId}`);
-          let response = await fetch(`/members/${memberId}`, {
+          let response = await fetch(`/members/${memberId}/pay`, {
             method: "POST",
             headers: {
               "Content-type": "application/json",

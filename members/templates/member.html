@@ -12,7 +12,14 @@
     <noscript>This webpage requires javascript to run.</noscript>
     <header><h1>Edit Member</h1></header>
     <main>
-      <form action="/members/{{ member.id }}" method="post">
+      <form action="/members/add">
+        <button style="position: absolute; top: 1rem; left: 1rem;">Add Member</button>
+      </form>
+      <form action="/members/{{ member.id }}" method="{{ 'post' }}">
+        <p>
+          <label for="id">Member ID:</label>
+          <input name="id" type="text" value="{{ member.id }}" readonly disabled />
+        </p>
         <p>
           <label for="first_name">First Name:</label>
           <input name="first_name" type="text" value="{{ member.first_name }}" />
@@ -50,7 +57,6 @@
           <input name="email" type="email" value="{{ member.email }}" />
         </p>
         <input type="submit" value="Save" />
-        <!-- <button type="submit">Save</button> -->
       </form>
     </main>
   </body>
