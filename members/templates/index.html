@@ -35,7 +35,7 @@
               <th>First Name</th>
               <th>Last Name</th>
               <th>Dues</th>
-              <th>Key Fob</th>
+              <!-- <th>Key Fob</th> -->
             </tr>
           </thead>
           <tbody>
@@ -57,14 +57,14 @@
                     <button disabled>Paid</button>
                   </template>
                 </td>
-                <td>
+                <!-- <td>
                   <button
                     @click="pay(member.id, 'fob', member.fob)"
                     x-text="dollarFmt.format(member.fob)"
                   >
                     Key Fob
                   </button>
-                </td>
+                </td> -->
               </tr>
             </template>
           </tbody>
@@ -131,9 +131,9 @@
             const json = await response.json();
             console.log(json);
 
-            // print receipt
-            let w = window.open(`/members/transactions/${json.transactionId}`);
-            w.print()
+            // TODO: (extra) print receipt
+            // let w = window.open(`/members/transactions/${json.transactionId}`);
+            // w.print()
             // w.close()
           } else {
             console.log(response);
