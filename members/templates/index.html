@@ -47,7 +47,7 @@
                 <td>
                   <template x-if="member.dues > 0">
                     <button
-                      @click="pay(member.id, 'dues', member.dues)"
+                      @click="pay(member, 'dues', member.dues)"
                       x-text="dollarFmt.format(member.dues)"
                     >
                       Pay
@@ -115,10 +115,13 @@
           });
         },
 
-        async pay(memberId, type, amount) {
+        async pay(member, type, amount) {
+          if (confirm(`Pay dues for ${member.first_name} ${member.last_name}`) == false)
+            return;
+
           // post payment to backend
-          console.log(`Marking payment for member ${memberId}`);
-          let response = await fetch(`/members/${memberId}/pay`, {
+          console.log(`Marking payment for member ${member.id}`);
+          let response = await fetch(`/members/${member.id}/pay`, {
             method: "POST",
             headers: {
               "Content-type": "application/json",
