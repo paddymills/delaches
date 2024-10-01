@@ -1,2 +1,0 @@
-[alias]
-dist = "build --release"

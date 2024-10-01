@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
-    <link rel="stylesheet" href="/style/base.css" />
-    <link rel="stylesheet" href="/style/table.css" />
-    <script defer src="/assets/alpine.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="/static/base.css" />
+    <link rel="stylesheet" href="/static/table.css" />
+    <script defer src="/static/alpine.min.js"></script>
     <title>Delaches Member Management</title>
   </head>
   <body>
@@ -27,32 +27,30 @@
           <thead class="ocean-gradient">
             <tr>
               <th>Member ID</th>
-              <th>Card ID</th>
               <th>First Name</th>
               <th>Last Name</th>
-              <th>Due</th>
+              <th>Address</th>
+              <th>City</th>
+              <th>State</th>
+              <th>Zip</th>
+              <th>Birthdate</th>
+              <th>Phone</th>
+              <th>Email</th>
             </tr>
           </thead>
           <tbody>
             <template x-for="(member, index) in members">
-              <tr>
-                <td x-text="member.MemberId"></td>
-                <td x-text="member.CardId"></td>
-                <td x-text="member.FirstName"></td>
-                <td x-text="member.LastName"></td>
-                <td>
-                  <template x-if="member.Dues > 0">
-                    <button
-                      @click="pay(member.MemberId)"
-                      x-text="dollarFmt.format(member.Dues)"
-                    >
-                      Pay
-                    </button>
-                  </template>
-                  <template x-if="member.Dues <= 0">
-                    <button disabled>Paid</button>
-                  </template>
-                </td>
+              <tr @click="() => window.location.href =`/members/${member.id}`">
+                <td x-text="member.id"></td>
+                <td x-text="member.first_name"></td>
+                <td x-text="member.last_name"></td>
+                <td x-text="member.address"></td>
+                <td x-text="member.city"></td>
+                <td x-text="member.state"></td>
+                <td x-text="member.zip"></td>
+                <td x-text="new Date(member.birthdate).toLocaleDateString('en-US')"></td>
+                <td x-text="member.phone"></td>
+                <td x-text="member.email"></td>
               </tr>
             </template>
           </tbody>
@@ -86,7 +84,7 @@
           clearInterval(this.refetch);
         },
         async getMembers() {
-          let response = await fetch("/members/dues");
+          let response = await fetch("/members/all");
           this._members = await response.json();
           // console.log(this._members);
         },
@@ -96,31 +94,13 @@
 
           this.members = this._members.filter((m) => {
             return (
-              findIn(m.MemberId, term) ||
-              findIn(m.CardId, term) ||
-              findIn(m.FirstName, term) ||
-              findIn(m.LastName, term)
+              findIn(m.id, term) ||
+              findIn(m.first_name, term) ||
+              findIn(m.last_name, term)
             );
           });
         },
 
-        async pay(memberId) {
-          // post payment to backend
-          console.log(`Marking payment for member ${memberId}`);
-          let response = await fetch(`/members/dues?id=${memberId}`, {
-            method: "POST",
-            headers: {
-              "Content-type": "application/json; charset=UTF-8",
-            },
-          });
-
-          if (!response.ok) {
-            console.log(response);
-            alert("Failed to save payment");
-          }
-
-          await this.getMembers();
-        },
       }));
     });
   </script>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="/static/base.css" />
+    <link rel="stylesheet" href="/static/table.css" />
+    <script defer src="/static/alpine.min.js"></script>
+    <title>Delaches Member Management</title>
+  </head>
+  <body>
+    <noscript>This webpage requires javascript to run.</noscript>
+    <header><h1>Delaches Active Members</h1></header>
+    {% if current_user.is_authenticated and current_user.user == 'admin' %}
+      <form action="/members">
+        <button style="position: absolute; top: 1rem; left: 1rem;">Manage Members</button>
+      </form>
+    {% endif %}
+    <main x-data="table">
+      <div>
+        <label for="search">Search:</label>
+        <input
+          name="search"
+          type="text"
+          x-model="searchTerm"
+          x-effect="search()"
+        />
+      </div>
+      <div class="table-container">
+        <table>
+          <thead class="ocean-gradient">
+            <tr>
+              <th>Member ID</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Dues</th>
+              <th>Key Fob</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(member, index) in members">
+              <tr>
+                <td x-text="member.id"></td>
+                <td x-text="member.first_name"></td>
+                <td x-text="member.last_name"></td>
+                <td>
+                  <template x-if="member.dues > 0">
+                    <button
+                      @click="pay(member.id, 'dues', member.dues)"
+                      x-text="dollarFmt.format(member.dues)"
+                    >
+                      Pay
+                    </button>
+                  </template>
+                  <template x-if="member.dues <= 0">
+                    <button disabled>Paid</button>
+                  </template>
+                </td>
+                <td>
+                  <button
+                    @click="pay(member.id, 'fob', member.fob)"
+                    x-text="dollarFmt.format(member.fob)"
+                  >
+                    Key Fob
+                  </button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </body>
+  <script>
+    const dollarFmt = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
+    function findIn(x, term) {
+      return x != null && x.toString().toLowerCase().includes(term);
+    }
+    document.addEventListener("alpine:init", () => {
+      Alpine.data("table", () => ({
+        _members: [],
+        members: [],
+        searchTerm: "",
+
+        async init() {
+          await this.getMembers();
+
+          this.refetch = setInterval(
+            async () => await this.getMembers(),
+            60 * 1000
+          );
+        },
+        destroy() {
+          clearInterval(this.refetch);
+        },
+        async getMembers() {
+          let response = await fetch("/members/all");
+          this._members = await response.json();
+          // console.log(this._members);
+        },
+
+        search() {
+          const term = this.searchTerm.toLowerCase();
+
+          this.members = this._members.filter((m) => {
+            return (
+              findIn(m.id, term) ||
+              findIn(m.first_name, term) ||
+              findIn(m.last_name, term)
+            );
+          });
+        },
+
+        async pay(memberId, type, amount) {
+          // post payment to backend
+          console.log(`Marking payment for member ${memberId}`);
+          let response = await fetch(`/members/${memberId}/pay`, {
+            method: "POST",
+            headers: {
+              "Content-type": "application/json",
+            },
+            body: JSON.stringify({"paymentType": type, "amount": amount}),
+          });
+
+          if (response.ok) {
+            console.log("Payment saved");
+            const json = await response.json();
+            console.log(json);
+
+            // print receipt
+            let w = window.open(`/members/transactions/${json.transactionId}`);
+            w.print()
+            // w.close()
+          } else {
+            console.log(response);
+            alert("Failed to save payment");
+          }
+
+          await this.getMembers();
+        },
+      }));
+    });
+  </script>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="/static/base.css" />
+    <script defer src="/static/alpine.min.js"></script>
+    <title>Delaches Member Management</title>
+  </head>
+  <body>
+    <noscript>This webpage requires javascript to run.</noscript>
+    <header><h1>Edit Member</h1></header>
+    <main>
+      <form action="/members/add">
+        <button style="position: absolute; top: 1rem; left: 1rem;">Add Member</button>
+      </form>
+      <form action="/members/{{ member.id }}" method="{{ 'post' }}">
+        <p>
+          <label for="id">Member ID:</label>
+          <input name="id" type="text" value="{{ member.id }}" readonly disabled />
+        </p>
+        <p>
+          <label for="first_name">First Name:</label>
+          <input name="first_name" type="text" value="{{ member.first_name }}" />
+        </p>
+        <p>
+          <label for="last_name">Last Name:</label>
+          <input name="last_name" type="text" value="{{ member.last_name }}" />
+        </p>
+        <p>
+          <label for="address">Address:</label>
+          <input name="address" type="text" value="{{ member.address }}" />
+        </p>
+        <p>
+          <label for="city">City:</label>
+          <input name="city" type="text" value="{{ member.city }}" />
+        </p>
+        <p>
+          <label for="state">State:</label>
+          <input name="state" type="text" value="{{ member.state }}" />
+        </p>
+        <p>
+          <label for="zip">Zip:</label>
+          <input name="zip" type="text" value="{{ member.zip }}" />
+        </p>
+        <p>
+          <label for="birthdate">Birthdate:</label>
+          <input name="birthdate" type="date" value="{{ member.birthdate }}" />
+        </p>
+        <p>
+          <label for="phone">Phone:</label>
+          <input name="phone" type="tel" value="{{ member.phone }}" />
+        </p>
+        <p>
+          <label for="email">Email:</label>
+          <input name="email" type="email" value="{{ member.email }}" />
+        </p>
+        <input type="submit" value="Save" />
+      </form>
+    </main>
+  </body>
+</html>

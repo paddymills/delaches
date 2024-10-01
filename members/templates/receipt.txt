@@ -1,0 +1,8 @@
+Delaches Member Dues Receipt
+===============================
+Receipt for {{ member.first_name }} {{ member.last_name }}
+Member Id: {{ member.id }}
+Payment Type: {{ transact.desc }}
+Amount: ${{ transact.amount }}
+===============================
+Thank you for your payment.
