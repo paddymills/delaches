@@ -11,7 +11,14 @@
   </head>
   <body>
     <noscript>This webpage requires javascript to run.</noscript>
+    <a
+      href="{{ url_for('main.index') }}"
+      style="position: absolute; top: 1rem; left: 1rem; border: 1px solid black"
+    >Home</a>
     <header><h1>Delaches Active Members</h1></header>
+    <form action="/members/add">
+      <button>Add New Member</button>
+    </form>
     <main x-data="table">
       <div>
         <label for="search">Search:</label>

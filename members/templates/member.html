@@ -10,11 +10,12 @@
   </head>
   <body>
     <noscript>This webpage requires javascript to run.</noscript>
+    <a
+      href="{{ url_for('members.member_mgmt') }}"
+      style="position: absolute; top: 1rem; left: 1rem; border: 1px solid black"
+    >Members List</a>
     <header><h1>Edit Member</h1></header>
     <main>
-      <form action="/members/add">
-        <button style="position: absolute; top: 1rem; left: 1rem;">Add Member</button>
-      </form>
       <form action="/members/{{ member.id }}" method="{{ 'post' }}">
         <p>
           <label for="id">Member ID:</label>
