@@ -72,14 +72,14 @@ class Transaction(BaseModel):
 	id = db.Column(db.Integer, primary_key=True)
 	member_id = db.Column(db.Integer, db.ForeignKey("members.id"))
 	member = db.relationship("Member", backref=db.backref("members", uselist=False))
-	
+
 	timestamp = db.Column(db.DateTime, server_default=db.func.now())
 	desc = db.Column(db.String(64))
 	amount = db.Column(db.Float)
 
 	def cur_year():
 		thisyear = datetime.datetime.now().year
-	
+
 		return Transaction.query.filter(
 			Transaction.timestamp.between(datetime.date(thisyear, 1, 1), datetime.date(thisyear, 12, 31))
 		)

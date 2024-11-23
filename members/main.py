@@ -16,5 +16,5 @@ def static(name):
 @main.errorhandler(404)
 def not_found(error):
     logger.error(error)
-    
+
     return render_template('404.html'), 404
