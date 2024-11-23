@@ -1,7 +1,7 @@
 from flask import Blueprint, request, abort, render_template, make_response
 from flask_login import login_required
 from . import db, logger
-from .models import Member, Transaction
+from .models import Member, Transaction, Dues
 from datetime import date
 
 members = Blueprint("members", __name__)
@@ -24,7 +24,8 @@ def listing():
 def member(id):
     logger.debug("requested member: {}".format(id))
 
-    return render_template("member.html", member=Member.query.get(id))
+    logger.debug(Dues.query.distinct(Dues.type).all())
+    return render_template("member.html", member=Member.query.get(id), types=Dues.query.distinct(Dues.type))
 
 
 @members.post("/members/")
@@ -43,6 +44,7 @@ def add_member():
         zip=request.form["zip"],
         phone=request.form["phone"],
         email=request.form["email"],
+        type=request.form["type"],
     )
     db.session.add(member)
     db.session.commit()
