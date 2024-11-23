@@ -2,7 +2,6 @@
 import datetime
 from . import db
 from flask_login import UserMixin
-from sqlalchemy import ForeignKey
 
 class BaseModel(db.Model):
 	__abstract__ = True

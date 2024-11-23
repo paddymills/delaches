@@ -8,7 +8,7 @@ from flask import (
 )
 from flask_login import login_user
 
-from . import db, login_manager, logger
+from . import login_manager, logger
 from .models import User
 
 auth = Blueprint('auth', __name__)
